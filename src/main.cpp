@@ -1,8 +1,17 @@
 #include <pico/stdlib.h>
 
-#include <demi/ws2812.hpp>
+#include <demi/led_strip.hpp>
 
 static const int PIXELS = 32;
+
+static const color_rgb _wheel[PIXELS / 2] = {
+    {0xFF, 0x00, 0x00}, {0xFF, 0x55, 0x00}, {0xFF, 0xAA, 0x00},
+    {0xFF, 0xFF, 0x00}, {0xAA, 0xFF, 0x00}, {0x55, 0xFF, 0x00},
+    {0x00, 0xFF, 0x00}, {0x00, 0xFF, 0x55}, {0x00, 0xAA, 0xAA},
+    {0x00, 0x55, 0xFF}, {0x00, 0x00, 0xFF}, {0x00, 0x00, 0xFF},
+    {0x00, 0x00, 0xFF}, {0x55, 0x00, 0xFF}, {0xAA, 0x00, 0xFF},
+    {0xFF, 0x00, 0xFF},
+};
 
 int
 main()
@@ -10,14 +19,22 @@ main()
     ws2812 ws{pio::state_machine{pio0, 0}};
     ws.initialize(11, 800000, false);
 
-    uint32_t c = 0;
+    led_strip strip{ws, PIXELS};
+
+    int index = 0;
+    for (auto &pixel : _wheel)
+    {
+        strip[index++] = pixel >> 1;
+    }
+
+    for (auto &pixel : _wheel)
+    {
+        strip[index++] = pixel >> 2;
+    }
+
     while (1)
     {
-        for (int i = 0; i < PIXELS; i++)
-        {
-            ws.put_pixel(c);
-            c += 16;
-        }
+        strip.handle();
         sleep_ms(125);
     }
 }
