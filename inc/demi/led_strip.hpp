@@ -11,6 +11,7 @@ class led_strip : public IPeriodicTask
 
     const unsigned               _length;
     std::unique_ptr<color_rgb[]> _frame;
+    bool                         _is_modified;
 
   public:
     class pixel_reference
@@ -20,7 +21,7 @@ class led_strip : public IPeriodicTask
 
       public:
         pixel_reference(led_strip &strip, unsigned index)
-            : _strip(strip), _index(index)
+            : _strip{strip}, _index{index}
         {
         }
 
@@ -28,6 +29,7 @@ class led_strip : public IPeriodicTask
         operator=(color_rgb rgb)
         {
             _strip._frame[_index] = rgb;
+            _strip._is_modified = true;
             return *this;
         }
 
@@ -39,7 +41,7 @@ class led_strip : public IPeriodicTask
 
     inline led_strip(ws2812 &ctl, unsigned length)
         : _ctl{ctl}, _length{length},
-          _frame(std::make_unique<color_rgb[]>(length))
+          _frame{std::make_unique<color_rgb[]>(length)}, _is_modified{false}
     {
     }
 
@@ -52,6 +54,12 @@ class led_strip : public IPeriodicTask
     virtual void
     handle() override
     {
+        if (!_is_modified)
+        {
+            return;
+        }
+
+        _is_modified = false;
         for (unsigned pixel = 0; pixel < _length; ++pixel)
         {
             _ctl.put_pixel(_frame[pixel]);
