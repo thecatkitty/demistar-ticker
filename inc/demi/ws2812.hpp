@@ -1,5 +1,6 @@
 #pragma once
 
+#include <demi/color.hpp>
 #include <demi/pio.hpp>
 
 class ws2812
@@ -44,8 +45,9 @@ class ws2812
     }
 
     inline void
-    put_pixel(uint8_t r, uint8_t g, uint8_t b)
+    put_pixel(color_rgb rgb)
     {
-        put_pixel(((uint32_t)(r) << 8) | ((uint32_t)(g) << 16) | (uint32_t)(b));
+        put_pixel(((uint32_t)(rgb.r) << 8) | ((uint32_t)(rgb.g) << 16) |
+                  (uint32_t)(rgb.b));
     }
 };
