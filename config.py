@@ -1,0 +1,6 @@
+RING_PIXELS = 16
+RINGS = 2
+
+IF_SSID = 'SSID'
+IF_PSK = 'PSK'
+IF_TRY = 10
