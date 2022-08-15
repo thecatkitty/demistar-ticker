@@ -3,6 +3,7 @@ import socket
 RECV_BUFFER = 512
 HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"]
 HTTP_METHOD_MAX_LENGTH = max([len(method) for method in HTTP_METHODS])
+HTTP_ENTITY_MAX_LENGTH = 16 * 1024
 
 class WebServer:
     _local: socket.socket
@@ -14,12 +15,14 @@ class WebServer:
     _method: str
     _uri: str
     _headers: dict
+    _data: bytearray
 
     STATE_IDLE = 0
     STATE_CONNECTED = 1
     STATE_METHOD_KNOWN = 2
     STATE_REQLINE_COMPLETE = 3
-    STATE_HEADERS_COMPLETE = 4
+    STATE_READING_DATA = 4
+    STATE_RESPONDING = 5
 
     def __init__(self, port: int = 80, backlog = 1) -> None:
         addr = socket.getaddrinfo("0.0.0.0", port)[0][-1]
@@ -95,16 +98,33 @@ class WebServer:
 
             headers_len = self._buff.index(b"\r\n\r\n")
             headers = self._buff[:headers_len].decode().split("\r\n")
-            self._buff = self._buff[(headers_len + 2):]
+            self._buff = self._buff[(headers_len + 4):]
 
             self._headers = {header[0]: header[1] for header in [header.split(": ", 1) for header in headers]}
-            self._state = WebServer.STATE_HEADERS_COMPLETE
+            if "Content-Length" in self._headers.keys():
+                data_length = int(self._headers["Content-Length"])
+                if data_length > HTTP_ENTITY_MAX_LENGTH:
+                    return self._request_entity_too_large()
+                else:
+                    self._data = bytearray(data_length)
+                    self._state = WebServer.STATE_READING_DATA
+            else:
+                self._state = WebServer.STATE_RESPONDING
 
-        elif self._state == WebServer.STATE_HEADERS_COMPLETE:
+        elif self._state == WebServer.STATE_READING_DATA:
+            data_length = int(self._headers["Content-Length"])
+            if len(self._buff) < data_length:
+                self._try_receive()
+                return
+
+            self._data[:] = self._buff[:data_length]
+            self._state = WebServer.STATE_RESPONDING
+            print("web: received {length} octets ({octets})".format(length=len(self._data), octets=self._data))
+
+        elif self._state == WebServer.STATE_RESPONDING:
             self._remote.send("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<h1>It Works!</h1><p>owo</p>")
             self._remote.close()
             self._state = WebServer.STATE_IDLE
-            print("web: response sent and connection closed")
 
     def _try_receive(self) -> bool:
         try:
@@ -124,3 +144,9 @@ class WebServer:
         self._remote.close()
         self._state = WebServer.STATE_IDLE
         print("web: bad request, connection closed")
+
+    def _request_entity_too_large(self) -> None:
+        self._remote.send("HTTP/1.1 413 Request Entity Too Large\r\n\r\n")
+        self._remote.close()
+        self._state = WebServer.STATE_IDLE
+        print("web: request entity too large, connection closed")
