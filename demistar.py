@@ -2,6 +2,7 @@ import network
 import socket
 import time
 
+from demiweb import WebServer
 from neopixel import Neopixel
 
 WHEEL = [
@@ -16,7 +17,7 @@ WHEEL = [
 class Demistar:
     _net: network.WLAN
     _rings: Neopixel
-    _sock: socket.socket
+    _server: WebServer
 
     def init_network(self, ssid: str, psk: str, retries: int) -> bool:
         self._net = network.WLAN(network.STA_IF)
@@ -47,11 +48,7 @@ class Demistar:
             index = index + 1
 
     def init_server(self, port: int) -> str:
-        addr = socket.getaddrinfo("0.0.0.0", port)[0][-1]
-        self._sock = socket.socket()
-        self._sock.bind(addr)
-        self._sock.setblocking(False)
-        self._sock.listen(1)
+        self._server = WebServer(port)
         return "{host}:{port}".format(host = self._net.ifconfig()[0], port = port)
 
     def run(self) -> None:
@@ -60,28 +57,5 @@ class Demistar:
 
     def _loop(self) -> None:
         self._rings.show()
-        try:
-            client, addr = self._sock.accept()
-            client.settimeout(2)
-            print("client connected from {addr}:{port}".format(
-                addr = addr[0],
-                port = addr[1]))
-
-            try:
-                request = client.recv(1024)
-                print(request)
-
-                client.send("received bytes: {bytes}\n".format(bytes = len(request)))
-                client.close()
-                print("connection with {addr}:{port} closed\n".format(
-                    addr = addr[0],
-                    port = addr[1]))
-
-            except OSError as ose:
-                client.close()
-                print("connection with {addr}:{port} broken\n".format(
-                    addr = addr[0],
-                    port = addr[1]))
-            
-        except OSError as ose:
-            time.sleep_ms(125)
+        self._server.handle()
+        time.sleep_ms(125)
