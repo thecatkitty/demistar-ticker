@@ -13,11 +13,13 @@ class WebServer:
 
     _method: str
     _uri: str
+    _headers: dict
 
     STATE_IDLE = 0
     STATE_CONNECTED = 1
     STATE_METHOD_KNOWN = 2
     STATE_REQLINE_COMPLETE = 3
+    STATE_HEADERS_COMPLETE = 4
 
     def __init__(self, port: int = 80, backlog = 1) -> None:
         addr = socket.getaddrinfo("0.0.0.0", port)[0][-1]
@@ -87,6 +89,18 @@ class WebServer:
             print("web: {method} {uri}".format(method=self._method, uri=self._uri))
 
         elif self._state == WebServer.STATE_REQLINE_COMPLETE:
+            if b"\r\n\r\n" not in self._buff:
+                self._try_receive()
+                return
+
+            headers_len = self._buff.index(b"\r\n\r\n")
+            headers = self._buff[:headers_len].decode().split("\r\n")
+            self._buff = self._buff[(headers_len + 2):]
+
+            self._headers = {header[0]: header[1] for header in [header.split(": ", 1) for header in headers]}
+            self._state = WebServer.STATE_HEADERS_COMPLETE
+
+        elif self._state == WebServer.STATE_HEADERS_COMPLETE:
             self._remote.send("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<h1>It Works!</h1><p>owo</p>")
             self._remote.close()
             self._state = WebServer.STATE_IDLE
