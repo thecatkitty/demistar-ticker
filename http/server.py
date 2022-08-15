@@ -6,45 +6,14 @@ RECV_BUFFER = 512
 HTTP_METHOD_MAX_LENGTH = max([len(method) for method in http.METHODS])
 HTTP_ENTITY_MAX_LENGTH = 16 * 1024
 
-class HttpRequest:
-    method: str
-    uri: str
-    headers: dict
-    data: bytearray
-
-    def __init__(self, method: str) -> None:
-        self.method = method
-
-
-class HttpResponse:
-    code: int
-    headers: dict
-    data: bytes
-
-    def __init__(self, code: int = 0) -> None:
-        self.code = code
-        self.headers = dict()
-        self.data = bytes(0)
-
-    def to_bytes(self) -> bytes:
-        reqline = "HTTP/1.1 {code} {status}\r\n".format(
-            code=self.code,
-            status=http.STATUS_CODES[self.code])
-        headers = "\r\n".join([
-            "{}: {}".format(name, value) for name, value in self.headers.items()
-        ])
-
-        return reqline.encode() + headers.encode() + b"\r\n\r\n" + self.data
-
-
 class WebServer:
     _local: socket.socket
     _remote: socket.socket
     _port: int
     _state: int
     _buff: bytearray
-    _request: HttpRequest
-    _response: HttpResponse
+    _request: http.HttpRequest
+    _response: http.HttpResponse
 
     STATE_IDLE = 0
     STATE_CONNECTED = 1
@@ -91,8 +60,8 @@ class WebServer:
                 return self._bad_request()
 
             if len(reqline) > 1:
-                self._request = HttpRequest(reqline[0])
-                self._response = HttpResponse()
+                self._request = http.HttpRequest(reqline[0])
+                self._response = http.HttpResponse()
                 self._buff = self._buff[(len(reqline[0]) + 1):]
                 self._state = WebServer.STATE_METHOD_KNOWN
 

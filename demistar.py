@@ -2,7 +2,7 @@ import network
 import socket
 import time
 
-from demiweb import WebServer
+from http import WebServer
 from neopixel import Neopixel
 
 WHEEL = [
