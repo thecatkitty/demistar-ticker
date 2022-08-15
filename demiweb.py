@@ -16,6 +16,27 @@ class HttpRequest:
         self.method = method
 
 
+class HttpResponse:
+    code: int
+    headers: dict
+    data: bytes
+
+    def __init__(self, code: int = 0) -> None:
+        self.code = code
+        self.headers = dict()
+        self.data = bytes(0)
+
+    def to_bytes(self) -> bytes:
+        reqline = "HTTP/1.1 {code} {status}\r\n".format(
+            code=self.code,
+            status=http.STATUS_CODES[self.code])
+        headers = "\r\n".join([
+            "{}: {}".format(name, value) for name, value in self.headers.items()
+        ])
+
+        return reqline.encode() + headers.encode() + b"\r\n\r\n" + self.data
+
+
 class WebServer:
     _local: socket.socket
     _remote: socket.socket
@@ -23,6 +44,7 @@ class WebServer:
     _state: int
     _buff: bytearray
     _request: HttpRequest
+    _response: HttpResponse
 
     STATE_IDLE = 0
     STATE_CONNECTED = 1
@@ -70,6 +92,7 @@ class WebServer:
 
             if len(reqline) > 1:
                 self._request = HttpRequest(reqline[0])
+                self._response = HttpResponse()
                 self._buff = self._buff[(len(reqline[0]) + 1):]
                 self._state = WebServer.STATE_METHOD_KNOWN
 
@@ -129,9 +152,15 @@ class WebServer:
             print("web: received {length} octets".format(length=len(self._request.data)))
 
         elif self._state == WebServer.STATE_RESPONDING:
-            self._remote.send("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<h1>It Works!</h1><p>owo</p>")
+            if self._response.code == 0:
+                self._response.code = 200
+                self._response.headers["Content-Type"] = "text/html"
+                self._response.data = "<h1>It works!</h1>".encode()
+
+            self._remote.write(self._response.to_bytes())
             self._remote.close()
             self._state = WebServer.STATE_IDLE
+            print("web: responded with {}".format(http.STATUS_CODES[self._response.code]))
 
     def _try_receive(self) -> bool:
         try:
@@ -147,13 +176,9 @@ class WebServer:
             return False
 
     def _bad_request(self) -> None:
-        self._remote.send("HTTP/1.1 400 Bad Request\r\n\r\n")
-        self._remote.close()
-        self._state = WebServer.STATE_IDLE
-        print("web: bad request, connection closed")
+        self._response.code = 400
+        self._state = WebServer.STATE_RESPONDING
 
     def _request_entity_too_large(self) -> None:
-        self._remote.send("HTTP/1.1 413 Request Entity Too Large\r\n\r\n")
-        self._remote.close()
-        self._state = WebServer.STATE_IDLE
-        print("web: request entity too large, connection closed")
+        self._response.code = 413
+        self._state = WebServer.STATE_RESPONDING
