@@ -1,8 +1,9 @@
 import socket
 
+import http
+
 RECV_BUFFER = 512
-HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"]
-HTTP_METHOD_MAX_LENGTH = max([len(method) for method in HTTP_METHODS])
+HTTP_METHOD_MAX_LENGTH = max([len(method) for method in http.METHODS])
 HTTP_ENTITY_MAX_LENGTH = 16 * 1024
 
 class HttpRequest:
@@ -63,7 +64,7 @@ class WebServer:
                 return
 
             reqline = self._buff.decode().split()
-            if reqline[0] not in [method[:len(reqline[0])] for method in HTTP_METHODS]:
+            if reqline[0] not in [method[:len(reqline[0])] for method in http.METHODS]:
                 print("web: invalid request line")
                 return self._bad_request()
 
