@@ -5,17 +5,23 @@ HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "T
 HTTP_METHOD_MAX_LENGTH = max([len(method) for method in HTTP_METHODS])
 HTTP_ENTITY_MAX_LENGTH = 16 * 1024
 
+class HttpRequest:
+    method: str
+    uri: str
+    headers: dict
+    data: bytearray
+
+    def __init__(self, method: str) -> None:
+        self.method = method
+
+
 class WebServer:
     _local: socket.socket
     _remote: socket.socket
     _port: int
     _state: int
     _buff: bytearray
-
-    _method: str
-    _uri: str
-    _headers: dict
-    _data: bytearray
+    _request: HttpRequest
 
     STATE_IDLE = 0
     STATE_CONNECTED = 1
@@ -62,7 +68,7 @@ class WebServer:
                 return self._bad_request()
 
             if len(reqline) > 1:
-                self._method = reqline[0]
+                self._request = HttpRequest(reqline[0])
                 self._buff = self._buff[(len(reqline[0]) + 1):]
                 self._state = WebServer.STATE_METHOD_KNOWN
 
@@ -87,9 +93,9 @@ class WebServer:
                 print("web: wrong protocol version in the request line")
                 return self._bad_request()
 
-            self._uri = reqline[0]
+            self._request.uri = reqline[0]
             self._state = WebServer.STATE_REQLINE_COMPLETE
-            print("web: {method} {uri}".format(method=self._method, uri=self._uri))
+            print("web: {method} {uri}".format(method=self._request.method, uri=self._request.uri))
 
         elif self._state == WebServer.STATE_REQLINE_COMPLETE:
             if b"\r\n\r\n" not in self._buff:
@@ -100,26 +106,26 @@ class WebServer:
             headers = self._buff[:headers_len].decode().split("\r\n")
             self._buff = self._buff[(headers_len + 4):]
 
-            self._headers = {header[0]: header[1] for header in [header.split(": ", 1) for header in headers]}
-            if "Content-Length" in self._headers.keys():
-                data_length = int(self._headers["Content-Length"])
+            self._request.headers = {header[0]: header[1] for header in [header.split(": ", 1) for header in headers]}
+            if "Content-Length" in self._request.headers.keys():
+                data_length = int(self._request.headers["Content-Length"])
                 if data_length > HTTP_ENTITY_MAX_LENGTH:
                     return self._request_entity_too_large()
                 else:
-                    self._data = bytearray(data_length)
+                    self._request.data = bytearray(data_length)
                     self._state = WebServer.STATE_READING_DATA
             else:
                 self._state = WebServer.STATE_RESPONDING
 
         elif self._state == WebServer.STATE_READING_DATA:
-            data_length = int(self._headers["Content-Length"])
+            data_length = int(self._request.headers["Content-Length"])
             if len(self._buff) < data_length:
                 self._try_receive()
                 return
 
-            self._data[:] = self._buff[:data_length]
+            self._request.data[:] = self._buff[:data_length]
             self._state = WebServer.STATE_RESPONDING
-            print("web: received {length} octets ({octets})".format(length=len(self._data), octets=self._data))
+            print("web: received {length} octets".format(length=len(self._request.data)))
 
         elif self._state == WebServer.STATE_RESPONDING:
             self._remote.send("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<h1>It Works!</h1><p>owo</p>")
