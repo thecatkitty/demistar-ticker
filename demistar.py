@@ -4,6 +4,7 @@ import time
 
 from http import WebServer, StaticPageProvider
 from neopixel import Neopixel
+from api import ApiProvider, DemistarInterface
 
 WHEEL = [
     (0xFF, 0x00, 0x00), (0xFF, 0x55, 0x00), (0xFF, 0xAA, 0x00),
@@ -14,7 +15,7 @@ WHEEL = [
     (0xFF, 0x00, 0xFF)
 ]
 
-class Demistar:
+class Demistar(DemistarInterface):
     _net: network.WLAN
     _rings: Neopixel
     _rings_changed: bool
@@ -53,11 +54,15 @@ class Demistar:
     def init_server(self, port: int) -> str:
         self._server = WebServer(port)
         self._server.add_provider("^/$", StaticPageProvider("text/html", "<h1>It works!</h1>".encode()))
+        self._server.add_provider("^/ring", ApiProvider(self))
         return "{host}:{port}".format(host = self._net.ifconfig()[0], port = port)
 
     def run(self) -> None:
         while True:
             self._loop()
+
+    def set_pixel(self, pixel: int, r: int, g: int, b: int):
+        self._rings.set_pixel(pixel, (r, g, b))
 
     def _loop(self) -> None:
         if self._rings_changed:
@@ -66,4 +71,11 @@ class Demistar:
             self._rings_changed = False
             time.sleep_ms(50)
 
-        self._server.handle()
+        if self._server is not None:
+            self._server.handle()
+
+    def get_rings(self) -> Neopixel:
+        return self._rings
+
+    def rings_changed(self) -> None:
+        self._rings_changed = True
