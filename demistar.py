@@ -2,7 +2,7 @@ import network
 import socket
 import time
 
-from http import WebServer
+from http import WebServer, StaticPageProvider
 from neopixel import Neopixel
 
 WHEEL = [
@@ -49,6 +49,7 @@ class Demistar:
 
     def init_server(self, port: int) -> str:
         self._server = WebServer(port)
+        self._server.add_provider("^/$", StaticPageProvider("text/html", "<h1>It works!</h1>".encode()))
         return "{host}:{port}".format(host = self._net.ifconfig()[0], port = port)
 
     def run(self) -> None:

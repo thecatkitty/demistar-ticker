@@ -1,6 +1,9 @@
+import re
 import socket
+from collections import OrderedDict
 
 import http
+
 
 RECV_BUFFER = 512
 HTTP_METHOD_MAX_LENGTH = max([len(method) for method in http.METHODS])
@@ -12,8 +15,12 @@ class WebServer:
     _port: int
     _state: int
     _buff: bytearray
+
     _request: http.HttpRequest
     _response: http.HttpResponse
+
+    _providers: OrderedDict
+    _fallback: http.ContentProvider
 
     STATE_IDLE = 0
     STATE_CONNECTED = 1
@@ -32,9 +39,15 @@ class WebServer:
         self._port = port
         self._state = WebServer.STATE_IDLE
 
+        self._providers = OrderedDict()
+        self._fallback = http.ContentProvider()
+
     @property
     def port(self) -> int:
         return self._port
+
+    def add_provider(self, pattern: str, provider: http.ContentProvider):
+        self._providers[pattern] = provider
 
     def handle(self) -> None:
         if self._state == WebServer.STATE_IDLE:
@@ -122,9 +135,7 @@ class WebServer:
 
         elif self._state == WebServer.STATE_RESPONDING:
             if self._response.code == 0:
-                self._response.code = 200
-                self._response.headers["Content-Type"] = "text/html"
-                self._response.data = "<h1>It works!</h1>".encode()
+                self._prepare_response()
 
             self._remote.write(self._response.to_bytes())
             self._remote.close()
@@ -139,10 +150,23 @@ class WebServer:
             return True
 
         except OSError as ose:
-            print("web: connection closed ({reason})".format(reason=ose.strerror))
+            print("web: connection closed ({})".format(ose.errno))
             self._state = WebServer.STATE_IDLE
             self._remote.close()
             return False
+
+    def _prepare_response(self) -> None:
+        if len(self._providers) == 0:
+            self._response = http.HttpResponse(500)
+            print("web: no registered providers")
+            return
+
+        for pattern, provider in self._providers.items():
+            if re.match(pattern, self._request.uri):
+                self._response = provider.handle_request(self._request)
+                return
+
+        self._response = self._fallback.handle_request(self._request)
 
     def _bad_request(self) -> None:
         self._response.code = 400
