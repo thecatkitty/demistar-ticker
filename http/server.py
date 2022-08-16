@@ -161,10 +161,16 @@ class WebServer:
             print("web: no registered providers")
             return
 
-        for pattern, provider in self._providers.items():
-            if re.match(pattern, self._request.uri):
-                self._response = provider.handle_request(self._request)
-                return
+        try:
+            for pattern, provider in self._providers.items():
+                if re.match(pattern, self._request.uri):
+                    self._response = provider.handle_request(self._request)
+                    return
+        except Exception as e:
+            self._response = http.HttpResponse(500)
+            self._response.headers["Content-Type"] = "text/plain"
+            self._response.data = "{}: {}".format(type(e).__name__, e).encode()
+            return
 
         self._response = self._fallback.handle_request(self._request)
 
