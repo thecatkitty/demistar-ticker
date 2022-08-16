@@ -1,3 +1,5 @@
+import os
+
 from .definitions import STATUS_CODES
 
 class HttpResponse:
@@ -8,6 +10,7 @@ class HttpResponse:
     def __init__(self, code: int = 0) -> None:
         self.code = code
         self.headers = dict()
+        self.headers["Server"] = "demistar/0.1 (MicroPython {})".format(os.uname()[2])
         self.data = bytes(0)
 
     def to_bytes(self) -> bytes:
