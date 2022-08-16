@@ -17,6 +17,7 @@ WHEEL = [
 class Demistar:
     _net: network.WLAN
     _rings: Neopixel
+    _rings_changed: bool
     _server: WebServer
 
     def init_network(self, ssid: str, psk: str, retries: int) -> bool:
@@ -47,6 +48,8 @@ class Demistar:
             self._rings.set_pixel(index, (pixel[0] >> 2, pixel[1] >> 2, pixel[2] >> 2))
             index = index + 1
 
+        self._rings_changed = True
+
     def init_server(self, port: int) -> str:
         self._server = WebServer(port)
         self._server.add_provider("^/$", StaticPageProvider("text/html", "<h1>It works!</h1>".encode()))
@@ -57,6 +60,10 @@ class Demistar:
             self._loop()
 
     def _loop(self) -> None:
-        self._rings.show()
+        if self._rings_changed:
+            time.sleep_ms(50)
+            self._rings.show()
+            self._rings_changed = False
+            time.sleep_ms(50)
+
         self._server.handle()
-        time.sleep_ms(125)
