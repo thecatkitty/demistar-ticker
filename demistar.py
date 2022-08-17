@@ -2,12 +2,13 @@ import network
 import socket
 import time
 
+from api import ApiProvider
+from controller.ring import RingsProviderInterface
 from http import WebServer, StaticPageProvider
 from neopixel import Neopixel
-from api import ApiProvider, DemistarInterface
 
 
-class Demistar(DemistarInterface):
+class Demistar(RingsProviderInterface):
     _net: network.WLAN
     _rings: Neopixel
     _rings_changed: bool
@@ -23,7 +24,7 @@ class Demistar(DemistarInterface):
                 break
 
             print("trying to connect ({}/{})".format(i + 1, retries))
-            self.set_pixel(16 + i, 0, 0, 64)
+            self._rings.set_pixel(16 + i, (0, 0, 64))
             self._rings.show()
             time.sleep(1)
 
@@ -54,9 +55,7 @@ class Demistar(DemistarInterface):
         if self._server is not None:
             self._server.handle()
 
-    def set_pixel(self, pixel: int, r: int, g: int, b: int) -> None:
-        self._rings.set_pixel(pixel, (r, g, b))
-
+    # Implementation of RingsProviderInterface
     def get_rings(self) -> Neopixel:
         return self._rings
 
