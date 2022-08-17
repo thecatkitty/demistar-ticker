@@ -38,7 +38,9 @@ class Demistar(DemistarInterface):
         return self._net.status() == 3
 
     def init_rings(self, length: int, pin: int) -> None:
-        self._rings = Neopixel(length, 0, pin, "GRB")
+        self._rings = Neopixel(length, 0, pin, "GRB", delay=0.005)
+        self._rings.clear()
+        self._rings.show()
 
         index = 0
         for pixel in WHEEL:
@@ -61,9 +63,6 @@ class Demistar(DemistarInterface):
         while True:
             self._loop()
 
-    def set_pixel(self, pixel: int, r: int, g: int, b: int):
-        self._rings.set_pixel(pixel, (r, g, b))
-
     def _loop(self) -> None:
         if self._rings_changed:
             time.sleep_ms(50)
@@ -73,6 +72,9 @@ class Demistar(DemistarInterface):
 
         if self._server is not None:
             self._server.handle()
+
+    def set_pixel(self, pixel: int, r: int, g: int, b: int) -> None:
+        self._rings.set_pixel(pixel, (r, g, b))
 
     def get_rings(self) -> Neopixel:
         return self._rings
