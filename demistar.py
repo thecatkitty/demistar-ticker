@@ -6,14 +6,6 @@ from http import WebServer, StaticPageProvider
 from neopixel import Neopixel
 from api import ApiProvider, DemistarInterface
 
-WHEEL = [
-    (0xFF, 0x00, 0x00), (0xFF, 0x55, 0x00), (0xFF, 0xAA, 0x00),
-    (0xFF, 0xFF, 0x00), (0xAA, 0xFF, 0x00), (0x55, 0xFF, 0x00),
-    (0x00, 0xFF, 0x00), (0x00, 0xFF, 0x55), (0x00, 0xAA, 0xAA),
-    (0x00, 0x55, 0xFF), (0x00, 0x00, 0xFF), (0x00, 0x00, 0xFF),
-    (0x00, 0x00, 0xFF), (0x55, 0x00, 0xFF), (0xAA, 0x00, 0xFF),
-    (0xFF, 0x00, 0xFF)
-]
 
 class Demistar(DemistarInterface):
     _net: network.WLAN
@@ -30,10 +22,10 @@ class Demistar(DemistarInterface):
             if self._net.status() < 0 or self._net.status() >= 3:
                 break
 
-            print("trying to connect ({i}/{max})".format(
-                i = i + 1,
-                max = retries))
-            time.sleep_ms(500)
+            print("trying to connect ({}/{})".format(i + 1, retries))
+            self.set_pixel(16 + i, 0, 0, 64)
+            self._rings.show()
+            time.sleep(1)
 
         return self._net.status() == 3
 
@@ -41,17 +33,6 @@ class Demistar(DemistarInterface):
         self._rings = Neopixel(length, 0, pin, "GRB", delay=0.005)
         self._rings.clear()
         self._rings.show()
-
-        index = 0
-        for pixel in WHEEL:
-            self._rings.set_pixel(index, (pixel[0] >> 1, pixel[1] >> 1, pixel[2] >> 1))
-            index = index + 1
-
-        for pixel in WHEEL:
-            self._rings.set_pixel(index, (pixel[0] >> 2, pixel[1] >> 2, pixel[2] >> 2))
-            index = index + 1
-
-        self._rings_changed = True
 
     def init_server(self, port: int) -> str:
         self._server = WebServer(port)
