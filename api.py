@@ -1,17 +1,15 @@
 import sys
 
 import controller
-
-from controller.ring import RingsProviderInterface
 from http import ContentProvider, HttpRequest, HttpResponse
 
 
 class ApiProvider(ContentProvider):
-    _prings: RingsProviderInterface
+    _deps: dict
 
-    def __init__(self, rings_provider: RingsProviderInterface) -> None:
+    def __init__(self, deps: dict) -> None:
         super().__init__()
-        self._prings = rings_provider
+        self._deps = deps
 
     def handle_request(self, request: HttpRequest) -> HttpResponse:
         parts = request.uri.split("/")
@@ -28,5 +26,10 @@ class ApiProvider(ContentProvider):
         if request.method.lower() not in dir(ctrl_class):
             return HttpResponse(405)
 
-        ctrl = ctrl_class(self._prings)
+        if ctrl_class.dependencies is None:
+            ctrl = ctrl_class()
+        else:
+            ctrl_deps = [self._deps[dep] for dep in ctrl_class.dependencies]
+            ctrl = ctrl_class(*ctrl_deps)
+        
         return getattr(ctrl, request.method.lower())(request)

@@ -15,6 +15,8 @@ class RingsProviderInterface:
 
 
 class RingController:
+    dependencies = ["rings_provider"]
+
     _prings: RingsProviderInterface
 
     def __init__(self, rings_provider: RingsProviderInterface) -> None:

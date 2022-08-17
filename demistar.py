@@ -38,7 +38,9 @@ class Demistar(RingsProviderInterface):
     def init_server(self, port: int) -> str:
         self._server = WebServer(port)
         self._server.add_provider("^/$", StaticPageProvider("text/html", "<h1>It works!</h1>".encode()))
-        self._server.add_provider("^/ring", ApiProvider(self))
+        self._server.add_provider("^/ring", ApiProvider({
+            "rings_provider": self
+        }))
         return "{host}:{port}".format(host = self._net.ifconfig()[0], port = port)
 
     def run(self) -> None:
