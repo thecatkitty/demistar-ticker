@@ -3,14 +3,18 @@ import re
 
 from http import ContentProvider, HttpRequest, HttpResponse
 from neopixel import Neopixel
+from view import ErrorView, JsonView
 
 
 class DemistarInterface:
+    def set_pixel(self, pixel: int, r: int, g: int, b: int) -> None:
+        raise NotImplementedError()
+
     def get_rings(self) -> Neopixel:
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def rings_changed(self) -> None:
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 class ApiProvider(ContentProvider):
@@ -30,49 +34,33 @@ class ApiProvider(ContentProvider):
         return HttpResponse(404)
  
     def handle_ring(self, request: HttpRequest) -> HttpResponse:
-        response = HttpResponse(200)
-        response.headers["Content-Type"] = "application/json"
-
         if request.method == "GET":
             print("api: get ring pixel colors")
-            response.data = json.dumps({
+            return JsonView({
                 "pixels": ["#{:06X}".format(rgb) for rgb in self.get_pixel_colors()]
-            }).encode()
-            return response
+            }).render()
 
         print("api: set ring pixel colors")
         try:
             data = json.loads(request.data.decode())
         except ValueError as ve:
-            response.code = 422
-            response.data = json.dumps({
-                "error": str(ve)
-            }).encode()
-            return response
+            return ErrorView(422, str(ve)).render()
 
         if type(data.get("pixels")) is not list:
-            response.code = 422
-            response.data = json.dumps({
-                "error": "'pixels' is expected to be a list"
-            }).encode()
-            return response
+            return ErrorView(422, "'pixels' is expected to be a list").render()
 
         pixels = data.get("pixels")
         rings = self._app.get_rings()
         if len(pixels) > rings.num_leds:
-            response.code = 422
-            response.data = json.dumps({
-                "error": "'pixels' is too long"
-            }).encode()
-            return response
+            return ErrorView(422, "'pixels' is too long").render()
 
         for i, rgb in enumerate(pixels):
             if type(rgb) is str and re.match("^#[0-9a-fA-F]+$", rgb):
                 print("api: set pixel {} color to {}".format(i, rgb))
-                rings.set_pixel(i, [int(rgb[i:(i + 2)], 16) for i in (1, 3, 5)])
+                r, g, b = [int(rgb[i:(i + 2)], 16) for i in (1, 3, 5)]
+                self._app.set_pixel(i, r, g, b)
                 self._app.rings_changed()
-        response.data = json.dumps({}).encode()
-        return response
+        return JsonView({}).render()
 
     def get_pixel_colors(self):
         rings = self._app.get_rings()
