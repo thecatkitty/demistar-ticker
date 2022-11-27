@@ -5,10 +5,14 @@ import time
 from api import ApiProvider
 from controller.ring import RingsProviderInterface
 from http import WebServer, StaticPageProvider
+from machine import Pin, SPI
+from max7219.max7219 import Matrix8x8
 from neopixel import Neopixel
 
 
 class Demistar(RingsProviderInterface):
+    _matrixa: Matrix8x8
+    _matrixb: Matrix8x8
     _net: network.WLAN
     _rings: Neopixel
     _rings_changed: bool
@@ -29,6 +33,16 @@ class Demistar(RingsProviderInterface):
             time.sleep(1)
 
         return self._net.status() == 3
+
+    def init_matrix(self, index: int, spi: SPI, cs: Pin) -> None:
+        if index not in [0, 1]:
+            return
+
+        matrix = Matrix8x8(spi, cs, 8)
+        if index == 0:
+            self._matrixa = matrix
+        else:
+            self._matrixb = matrix
 
     def init_rings(self, length: int, pin: int) -> None:
         self._rings = Neopixel(length, 0, pin, "GRB", delay=0.005)
@@ -56,6 +70,13 @@ class Demistar(RingsProviderInterface):
 
         if self._server is not None:
             self._server.handle()
+
+    def get_matrix(self, index: int) -> Matrix8x8:
+        if index == 0:
+            return self._matrixa
+        elif index == 1:
+            return self._matrixb
+        raise IndexError()
 
     # Implementation of RingsProviderInterface
     def get_rings(self) -> Neopixel:
