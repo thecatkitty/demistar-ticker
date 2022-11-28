@@ -18,12 +18,12 @@ app.get_matrix(0).show()
 
 if not app.init_network(config.IF_SSID, config.IF_PSK, config.IF_TRY):
     print("connection failed")
-    app.get_rings().set_pixel_line(16, 32, (64, 0, 0))
+    app.get_ring(1).fill(64, 0, 0)
     app.get_matrix(1).text("no conn", 4, 0)
 else:
     print("connected")
 
-    app.get_rings().set_pixel_line(16, 32, (0, 64, 0))
+    app.get_ring(1).fill(0, 64, 0)
     addr = app.init_server(2137)
     print("listening at {}".format(addr))
     app.get_matrix(1).text(".{}".format(addr.split(".")[-1]), 0, 0)

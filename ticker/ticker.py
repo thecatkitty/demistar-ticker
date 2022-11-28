@@ -10,14 +10,20 @@ from driver.max7219.max7219 import Matrix8x8
 from driver.neopixel import Neopixel
 from machine import Pin, SPI
 
+from .ring import Ring
+
 
 class DemistarTicker(RingsProviderInterface):
+    _net: network.WLAN
+    _server: WebServer
+
     _matrixa: Matrix8x8
     _matrixb: Matrix8x8
-    _net: network.WLAN
-    _rings: Neopixel
+    _strip: Neopixel
     _rings_changed: bool
-    _server: WebServer
+
+    _ringa: Ring
+    _ringb: Ring
 
     def init_network(self, ssid: str, psk: str, retries: int) -> bool:
         self._net = network.WLAN(network.STA_IF)
@@ -29,8 +35,7 @@ class DemistarTicker(RingsProviderInterface):
                 break
 
             print("trying to connect ({}/{})".format(i + 1, retries))
-            self._rings.set_pixel(16 + i, (0, 0, 64))
-            self._rings.show()
+            self._ringb[i] = 0, 0, 64
             time.sleep(1)
 
         return self._net.status() == 3
@@ -46,9 +51,11 @@ class DemistarTicker(RingsProviderInterface):
             self._matrixb = matrix
 
     def init_rings(self, length: int, pin: int) -> None:
-        self._rings = Neopixel(length, 0, pin, "GRB", delay=0.005)
-        self._rings.clear()
-        self._rings.show()
+        self._strip = Neopixel(length, 0, pin, "GRB", delay=0.005)
+        self._ringa = Ring(self._strip, 0, 16)
+        self._ringb = Ring(self._strip, 16, 16)
+        self._strip.clear()
+        self._strip.show()
 
     def init_server(self, port: int) -> str:
         self._server = WebServer(port)
@@ -64,10 +71,9 @@ class DemistarTicker(RingsProviderInterface):
 
     def _loop(self) -> None:
         if self._rings_changed:
-            time.sleep_ms(50)
-            self._rings.show()
+            time.sleep_ms(150)
+            self._strip.show()
             self._rings_changed = False
-            time.sleep_ms(50)
 
         if self._server is not None:
             self._server.handle()
@@ -80,8 +86,8 @@ class DemistarTicker(RingsProviderInterface):
         raise IndexError()
 
     # Implementation of RingsProviderInterface
-    def get_rings(self) -> Neopixel:
-        return self._rings
+    def get_ring(self, index: int) -> Ring:
+        return self._ringa if index == 0 else self._ringb
 
     def rings_changed(self) -> None:
         self._rings_changed = True
