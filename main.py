@@ -1,10 +1,10 @@
 from machine import Pin, SPI
 
 import config
-from demistar import Demistar
+from ticker import DemistarTicker
 
 
-app = Demistar()
+app = DemistarTicker()
 app.init_rings(config.RING_PIXELS * config.RINGS, config.RINGS_PIN)
 app.init_matrix(0, SPI(config.MATRIXA_SPI,
     sck=Pin(config.MATRIXA_SCK),

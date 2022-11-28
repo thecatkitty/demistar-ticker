@@ -2,8 +2,9 @@ import json
 import re
 
 from http import HttpRequest, HttpResponse
-from neopixel import Neopixel
 from view import ErrorView, JsonView
+
+from driver.neopixel import Neopixel
 
 
 class RingsProviderInterface:

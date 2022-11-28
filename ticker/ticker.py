@@ -5,12 +5,13 @@ import time
 from api import ApiProvider
 from controller.ring import RingsProviderInterface
 from http import WebServer, StaticPageProvider
+
+from driver.max7219.max7219 import Matrix8x8
+from driver.neopixel import Neopixel
 from machine import Pin, SPI
-from max7219.max7219 import Matrix8x8
-from neopixel import Neopixel
 
 
-class Demistar(RingsProviderInterface):
+class DemistarTicker(RingsProviderInterface):
     _matrixa: Matrix8x8
     _matrixb: Matrix8x8
     _net: network.WLAN
