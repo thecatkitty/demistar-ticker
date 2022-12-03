@@ -11,11 +11,13 @@ from driver.neopixel import Neopixel
 from machine import Pin, SPI
 
 from .ring import Ring
+from .cefo import CelonesFont
 
 
 class DemistarTicker(RingsProviderInterface):
     _net: network.WLAN
     _server: WebServer
+    font: CelonesFont
 
     _matrixa: Matrix8x8
     _matrixb: Matrix8x8
@@ -24,6 +26,9 @@ class DemistarTicker(RingsProviderInterface):
 
     _ringa: Ring
     _ringb: Ring
+
+    def __init__(self) -> None:
+        self.font = CelonesFont("/ticker/Gidotto8.cefo")
 
     def init_network(self, ssid: str, psk: str, retries: int) -> bool:
         self._net = network.WLAN(network.STA_IF)
