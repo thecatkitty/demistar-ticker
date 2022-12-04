@@ -1,26 +1,24 @@
 import network
-import socket
 import time
 
 from api import ApiProvider
 from controller.ring import RingsProviderInterface
 from http import WebServer, StaticPageProvider
 
-from driver.max7219.max7219 import Matrix8x8
 from driver.neopixel import Neopixel
-from machine import Pin, SPI
 
-from .ring import Ring
 from .cefo import CelonesFont
+from .ring import Ring
+from .matrix import MatrixDisplay
 
 
 class DemistarTicker(RingsProviderInterface):
     _net: network.WLAN
     _server: WebServer
-    font: CelonesFont
+    _font: CelonesFont
 
-    _matrixa: Matrix8x8
-    _matrixb: Matrix8x8
+    _matrixa: MatrixDisplay
+    _matrixb: MatrixDisplay
     _strip: Neopixel
     _rings_changed: bool
 
@@ -28,7 +26,7 @@ class DemistarTicker(RingsProviderInterface):
     _ringb: Ring
 
     def __init__(self) -> None:
-        self.font = CelonesFont("/ticker/Gidotto8.cefo")
+        self._font = CelonesFont("/ticker/Gidotto8.cefo")
 
     def init_network(self, ssid: str, psk: str, retries: int) -> bool:
         self._net = network.WLAN(network.STA_IF)
@@ -45,11 +43,12 @@ class DemistarTicker(RingsProviderInterface):
 
         return self._net.status() == 3
 
-    def init_matrix(self, index: int, spi: SPI, cs: Pin) -> None:
+    def init_matrix(self, index: int, spi: int, sck: int, mosi: int, cs: int) -> None:
         if index not in [0, 1]:
             return
 
-        matrix = Matrix8x8(spi, cs, 8)
+        matrix = MatrixDisplay(spi, sck, mosi, cs)
+        matrix.font = self._font
         if index == 0:
             self._matrixa = matrix
         else:
@@ -80,10 +79,10 @@ class DemistarTicker(RingsProviderInterface):
             self._strip.show()
             self._rings_changed = False
 
-        if self._server is not None:
+        if hasattr(self, "_server"):
             self._server.handle()
 
-    def get_matrix(self, index: int) -> Matrix8x8:
+    def get_matrix(self, index: int) -> MatrixDisplay:
         if index == 0:
             return self._matrixa
         elif index == 1:
