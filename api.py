@@ -18,7 +18,8 @@ class ApiProvider(ContentProvider):
 
         ctrl_name = parts[1][0].upper() + parts[1][1:] + "Controller"
         try:
-            ctrl_class = getattr(sys.modules["controller.{}".format(parts[1])], ctrl_name)
+            ctrl_class = getattr(
+                sys.modules["controller.{}".format(parts[1])], ctrl_name)
         except Exception as e:
             print("api: ", str(e))
             return HttpResponse(500)
@@ -31,5 +32,5 @@ class ApiProvider(ContentProvider):
         else:
             ctrl_deps = [self._deps[dep] for dep in ctrl_class.dependencies]
             ctrl = ctrl_class(*ctrl_deps)
-        
+
         return getattr(ctrl, request.method.lower())(request)

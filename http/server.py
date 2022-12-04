@@ -9,6 +9,7 @@ RECV_BUFFER = 512
 HTTP_METHOD_MAX_LENGTH = max([len(method) for method in http.METHODS])
 HTTP_ENTITY_MAX_LENGTH = 16 * 1024
 
+
 class WebServer:
     _local: socket.socket
     _remote: socket.socket
@@ -29,13 +30,13 @@ class WebServer:
     STATE_READING_DATA = 4
     STATE_RESPONDING = 5
 
-    def __init__(self, port: int = 80, backlog = 1) -> None:
+    def __init__(self, port: int = 80, backlog=1) -> None:
         addr = socket.getaddrinfo("0.0.0.0", port)[0][-1]
         self._local = socket.socket()
         self._local.bind(addr)
         self._local.setblocking(False)
         self._local.listen(backlog)
-        
+
         self._port = port
         self._state = WebServer.STATE_IDLE
 
@@ -89,7 +90,7 @@ class WebServer:
 
             reqline = self._buff.decode().split("\r\n", 1)[0]
             self._buff = self._buff[(len(reqline) + 2):]
-            
+
             reqline = reqline.split()
             if len(reqline) != 2:
                 print("web: wrong number of parts in the request line")
@@ -101,7 +102,8 @@ class WebServer:
 
             self._request.uri = reqline[0]
             self._state = WebServer.STATE_REQLINE_COMPLETE
-            print("web: {method} {uri}".format(method=self._request.method, uri=self._request.uri))
+            print("web: {method} {uri}".format(
+                method=self._request.method, uri=self._request.uri))
 
         elif self._state == WebServer.STATE_REQLINE_COMPLETE:
             if b"\r\n\r\n" not in self._buff:
@@ -112,7 +114,8 @@ class WebServer:
             headers = self._buff[:headers_len].decode().split("\r\n")
             self._buff = self._buff[(headers_len + 4):]
 
-            self._request.headers = {header[0]: header[1] for header in [header.split(": ", 1) for header in headers]}
+            self._request.headers = {header[0]: header[1] for header in [
+                header.split(": ", 1) for header in headers]}
             if "Content-Length" in self._request.headers.keys():
                 data_length = int(self._request.headers["Content-Length"])
                 if data_length > HTTP_ENTITY_MAX_LENGTH:
@@ -131,7 +134,8 @@ class WebServer:
 
             self._request.data[:] = self._buff[:data_length]
             self._state = WebServer.STATE_RESPONDING
-            print("web: received {length} octets".format(length=len(self._request.data)))
+            print("web: received {length} octets".format(
+                length=len(self._request.data)))
 
         elif self._state == WebServer.STATE_RESPONDING:
             if self._response.code == 0:
@@ -140,7 +144,8 @@ class WebServer:
             self._remote.write(self._response.to_bytes())
             self._remote.close()
             self._state = WebServer.STATE_IDLE
-            print("web: responded with {}".format(http.STATUS_CODES[self._response.code]))
+            print("web: responded with {}".format(
+                http.STATUS_CODES[self._response.code]))
 
     def _try_receive(self) -> bool:
         try:

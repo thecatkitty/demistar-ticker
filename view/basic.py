@@ -1,5 +1,6 @@
 from http import HttpResponse
 
+
 class BasicView:
     model: object
     status: int

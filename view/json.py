@@ -3,6 +3,7 @@ import json
 from http import HttpResponse
 from .basic import BasicView
 
+
 class JsonView(BasicView):
     def __init__(self, model, status: int = 200) -> None:
         super().__init__(model, status)
