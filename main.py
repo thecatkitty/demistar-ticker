@@ -9,7 +9,7 @@ app.init_rings(RING_PIXELS * RINGS, RINGS_PIN)
 app.init_matrix(0, MATRIXA_SPI, MATRIXA_SCK, MATRIXA_MOSI, MATRIXA_CS)
 app.init_matrix(1, MATRIXB_SPI, MATRIXB_SCK, MATRIXB_MOSI, MATRIXB_CS)
 
-app.get_matrix(0).draw_text("Demistar")
+app.get_matrix(0).draw_text("Demistar Ticker")
 app.get_matrix(0).update()
 
 if not app.init_network(IF_SSID, IF_PSK, IF_TRY):
