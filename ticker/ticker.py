@@ -2,6 +2,7 @@ import network
 import time
 
 from api import ApiProvider
+from config import *
 from controller.ring import RingsProviderInterface
 from http import WebServer, StaticPageProvider
 
@@ -16,6 +17,7 @@ class DemistarTicker(RingsProviderInterface):
     _net: network.WLAN
     _server: WebServer
     _font: CelonesFont
+    _last_sec: int
 
     _matrixa: MatrixDisplay
     _matrixb: MatrixDisplay
@@ -27,6 +29,7 @@ class DemistarTicker(RingsProviderInterface):
 
     def __init__(self) -> None:
         self._font = CelonesFont("/ticker/Gidotto8.cefo")
+        self._last_sec = 0
 
     def init_network(self, ssid: str, psk: str, retries: int) -> bool:
         self._net = network.WLAN(network.STA_IF)
@@ -82,6 +85,17 @@ class DemistarTicker(RingsProviderInterface):
 
         if hasattr(self, "_server"):
             self._server.handle()
+
+            timestamp = time.localtime(time.time() + TZ_OFFSET)
+            if timestamp[5] != self._last_sec:
+                self._matrixa.clear()
+                self._matrixa.draw_text("{3:02}:{4:02}:{5:02}".format(*timestamp))
+                self._matrixa.update()
+
+                self._ringb._strip.fill((0, 0, 0))
+                self._ringb._strip.set_pixel_line(0, round((timestamp[3] % 12) * 16 / 12), (3, 0, 2))
+                self._ringb._strip.set_pixel_line(16, 16 + round(timestamp[4] * 16 / 60), (3, 2, 0))
+                self._ringb._strip.show()
 
     def get_matrix(self, index: int) -> MatrixDisplay:
         if index == 0:

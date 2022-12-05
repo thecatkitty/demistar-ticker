@@ -15,6 +15,9 @@ class MatrixDisplay:
         self._ctl = Matrix8x8(
             SPI(spi, sck=Pin(sck), mosi=Pin(mosi)), Pin(cs), 8)
 
+    def clear(self) -> None:
+        self._ctl.fill(0)
+
     def draw_text(self, text: str, font=None, x: int = 0) -> FrameBuffer:
         if font is None:
             font = self.font

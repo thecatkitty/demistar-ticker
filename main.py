@@ -1,3 +1,5 @@
+import ntptime
+
 from config import *
 from ticker import DemistarTicker
 
@@ -21,6 +23,8 @@ else:
     addr = app.init_server(2137)
     print("listening at {}".format(addr))
     app.get_matrix(1).draw_text(addr.split(":")[0])
+
+    ntptime.settime()
 
 app.get_matrix(1).update()
 
