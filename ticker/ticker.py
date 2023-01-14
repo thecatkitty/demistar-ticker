@@ -97,6 +97,8 @@ class DemistarTicker(RingsProviderInterface):
                 self._ringb._strip.set_pixel_line(16, 16 + round(timestamp[4] * 16 / 60), (3, 2, 0))
                 self._ringb._strip.show()
 
+                self._last_sec = timestamp[5]
+
     def get_matrix(self, index: int) -> MatrixDisplay:
         if index == 0:
             return self._matrixa
