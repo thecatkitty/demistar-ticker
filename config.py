@@ -17,3 +17,5 @@ IF_PSK = 'PSK'
 IF_TRY = 10
 
 TZ_OFFSET = +1 * 60 * 60
+WEEKDAYS = ["Monday", "Tuesday", "Wednesday",
+            "Thursday", "Friday", "Saturday", "Sunday"]

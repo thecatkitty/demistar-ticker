@@ -89,8 +89,13 @@ class DemistarTicker(RingsProviderInterface):
             timestamp = time.localtime()
             if timestamp[5] != self._last_sec:
                 self._matrixa.clear()
-                self._matrixa.draw_text("{3:02}:{4:02}:{5:02}".format(*timestamp))
+                self._matrixa.draw_text(
+                    "{3:02}:{4:02}:{5:02}".format(*timestamp))
                 self._matrixa.update()
+
+                self._matrixb.clear()
+                self._matrixb.draw_text(WEEKDAYS[timestamp[6]])
+                self._matrixb.update()
 
                 self._ringb._strip.fill((0, 0, 0))
                 self._ringb._strip.set_pixel_line(0, round((timestamp[3] % 12) * 16 / 12), (3, 0, 2))
