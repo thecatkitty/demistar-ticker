@@ -29,11 +29,19 @@ class Ring:
         rsh, gsh, bsh, _ = self._strip.shift
         pixel = (value[0] << rsh) | (value[1] << gsh) | (value[2] << bsh)
         self._strip.pixels[self._start + index] = pixel
-        self._strip.show()
+        self.update()
 
-    def fill(self, r: int, g: int, b: int):
+    def fill(self, r: int, g: int, b: int, update: bool = True):
+        self.put_line(r, g, b, 0, self._length, update)
+
+    def put_line(self, r: int, g: int, b: int, start: int, length: int, update: bool = True):
         rsh, gsh, bsh, _ = self._strip.shift
         pixel = (r << rsh) | (g << gsh) | (b << bsh)
-        for i in range(self._start, self._start + self._length):
+        for i in range(self._start + start, self._start + start + length):
             self._strip.pixels[i] = pixel
+
+        if update:
+            self.update()
+
+    def update(self):
         self._strip.show()

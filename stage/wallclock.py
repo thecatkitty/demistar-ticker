@@ -36,11 +36,13 @@ class WallclockStage:
         self._bottom.draw_text(WEEKDAYS[timestamp[6]])
         self._bottom.update()
 
-        self._outer._strip.fill((0, 0, 0))
-        self._outer._strip.set_pixel_line(
-            0, round((timestamp[3] % 12) * 16 / 12), (3, 0, 2))
-        self._outer._strip.set_pixel_line(
-            16, 16 + round(timestamp[4] * 16 / 60), (3, 2, 0))
-        self._outer._strip.show()
+        minute_hand = round((timestamp[3] % 12) * 16 / 12)
+        self._inner.fill(0, 0, 0, False)
+        self._inner.put_line(3, 0, 2, 0, minute_hand, False)
 
+        hour_hand = round(timestamp[4] * 16 / 60)
+        self._outer.fill(0, 0, 0, False)
+        self._outer.put_line(3, 2, 0, 0, hour_hand, False)
+
+        self._inner.update()
         self._last_sec = timestamp[5]
