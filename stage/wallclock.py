@@ -42,11 +42,11 @@ class WallclockStage:
         self._bottom.draw_text(bottom_text, x=-1)
         self._bottom.update()
 
-        minute_hand = round((timestamp[3] % 12) * 16 / 12)
+        minute_hand = round(timestamp[4] * 16 / 60)
         self._inner.fill(0, 0, 0, False)
         self._inner.put_line(3, 0, 2, 0, minute_hand, False)
 
-        hour_hand = round(timestamp[4] * 16 / 60)
+        hour_hand = round((timestamp[3] % 12) * 16 / 12)
         self._outer.fill(0, 0, 0, False)
         self._outer.put_line(3, 2, 0, 0, hour_hand, False)
 

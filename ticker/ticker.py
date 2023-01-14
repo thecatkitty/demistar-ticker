@@ -17,66 +17,40 @@ from .matrix import MatrixDisplay
 class DemistarTicker(RingsProviderInterface):
     _net: network.WLAN
     _server: WebServer
-    _font: CelonesFont
 
-    _matrixa: MatrixDisplay
-    _matrixb: MatrixDisplay
+    _top: MatrixDisplay
+    _bottom: MatrixDisplay
     _strip: Neopixel
     _rings_changed: bool
 
-    _ringa: Ring
-    _ringb: Ring
+    _inner: Ring
+    _outer: Ring
 
     _stage: WallclockStage
 
-    def __init__(self) -> None:
-        self._font = CelonesFont("/ticker/Gidotto8.cefo")
+    def __init__(self, top_display: MatrixDisplay, bottom_display: MatrixDisplay, inner_ring: Ring, outer_ring: Ring) -> None:
+        self._top = top_display
+        self._bottom = bottom_display
+        self._inner = inner_ring
+        self._outer = outer_ring
 
-    def init_network(self, ssid: str, psk: str, retries: int) -> bool:
-        self._net = network.WLAN(network.STA_IF)
-        self._net.active(True)
-        self._net.connect(ssid, psk)
+        font = CelonesFont("/ticker/Gidotto8.cefo")
+        self._top.font = font
+        self._bottom.font = font
 
-        for i in range(retries):
-            if self._net.status() < 0 or self._net.status() >= 3:
-                break
+        self._rings_changed = False
 
-            print("trying to connect ({}/{})".format(i + 1, retries))
-            self._ringb[i] = 0, 0, 64
-            time.sleep(1)
-
-        return self._net.status() == 3
-
-    def init_matrix(self, index: int, spi: int, sck: int, mosi: int, cs: int) -> None:
-        if index not in [0, 1]:
-            return
-
-        matrix = MatrixDisplay(spi, sck, mosi, cs)
-        matrix.font = self._font
-        if index == 0:
-            self._matrixa = matrix
-        else:
-            self._matrixb = matrix
-
-    def init_rings(self, length: int, pin: int) -> None:
-        self._strip = Neopixel(length, 0, pin, "GRB", delay=0.001)
-        self._ringa = Ring(self._strip, 0, 16)
-        self._ringb = Ring(self._strip, 16, 16)
-        self._strip.clear()
-        self._strip.show()
-
-    def init_server(self, port: int) -> str:
+    def run(self, port: int) -> None:
         self._server = WebServer(port)
         self._server.add_provider(
             "^/$", StaticPageProvider("text/html", "<h1>It works!</h1>".encode()))
         self._server.add_provider("^/", ApiProvider({
             "rings_provider": self
         }))
-        return "{host}:{port}".format(host=self._net.ifconfig()[0], port=port)
 
-    def run(self) -> None:
+        print("ticker: setting the stage")
         self._stage = WallclockStage(
-            self._matrixa, self._matrixb, self._ringa, self._ringb)
+            self._top, self._bottom, self._inner, self._outer)
 
         while True:
             self._loop()
@@ -84,7 +58,7 @@ class DemistarTicker(RingsProviderInterface):
     def _loop(self) -> None:
         if self._rings_changed:
             time.sleep_ms(150)
-            self._strip.show()
+            self._bottom.update()
             self._rings_changed = False
 
         if hasattr(self, "_server"):
@@ -92,16 +66,9 @@ class DemistarTicker(RingsProviderInterface):
 
         self._stage.update()
 
-    def get_matrix(self, index: int) -> MatrixDisplay:
-        if index == 0:
-            return self._matrixa
-        elif index == 1:
-            return self._matrixb
-        raise IndexError()
-
     # Implementation of RingsProviderInterface
     def get_ring(self, index: int) -> Ring:
-        return self._ringa if index == 0 else self._ringb
+        return self._inner if index == 0 else self._outer
 
     def rings_changed(self) -> None:
         self._rings_changed = True

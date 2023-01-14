@@ -30,7 +30,7 @@ class WebServer:
     STATE_READING_DATA = 4
     STATE_RESPONDING = 5
 
-    def __init__(self, port: int = 80, backlog=1) -> None:
+    def __init__(self, port: int = 80, backlog = 1) -> None:
         addr = socket.getaddrinfo("0.0.0.0", port)[0][-1]
         self._local = socket.socket()
         self._local.bind(addr)
@@ -42,6 +42,8 @@ class WebServer:
 
         self._providers = OrderedDict()
         self._fallback = http.ContentProvider()
+
+        print("web: listening at {}".format(port))
 
     @property
     def port(self) -> int:
