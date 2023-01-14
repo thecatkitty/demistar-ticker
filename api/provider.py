@@ -1,6 +1,5 @@
 import sys
 
-import controller
 from http import ContentProvider, HttpRequest, HttpResponse
 
 
@@ -12,6 +11,7 @@ class ApiProvider(ContentProvider):
         self._deps = deps
 
     def handle_request(self, request: HttpRequest) -> HttpResponse:
+        import controller
         parts = request.uri.split("/")
         if parts[1] not in dir(controller):
             return HttpResponse(404)

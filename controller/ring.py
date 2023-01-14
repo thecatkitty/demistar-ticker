@@ -1,8 +1,8 @@
 import json
 import re
 
+from api import ErrorView, JsonView
 from http import HttpRequest, HttpResponse
-from view import ErrorView, JsonView
 
 from ticker.ring import Ring
 
