@@ -5,6 +5,7 @@ from api import ApiProvider
 from config import *
 from controller.ring import RingsProviderInterface
 from http import WebServer, StaticPageProvider
+from stage.wallclock import WallclockStage
 
 from driver.neopixel import Neopixel
 
@@ -17,7 +18,6 @@ class DemistarTicker(RingsProviderInterface):
     _net: network.WLAN
     _server: WebServer
     _font: CelonesFont
-    _last_sec: int
 
     _matrixa: MatrixDisplay
     _matrixb: MatrixDisplay
@@ -27,9 +27,10 @@ class DemistarTicker(RingsProviderInterface):
     _ringa: Ring
     _ringb: Ring
 
+    _stage: WallclockStage
+
     def __init__(self) -> None:
         self._font = CelonesFont("/ticker/Gidotto8.cefo")
-        self._last_sec = 0
 
     def init_network(self, ssid: str, psk: str, retries: int) -> bool:
         self._net = network.WLAN(network.STA_IF)
@@ -74,6 +75,9 @@ class DemistarTicker(RingsProviderInterface):
         return "{host}:{port}".format(host=self._net.ifconfig()[0], port=port)
 
     def run(self) -> None:
+        self._stage = WallclockStage(
+            self._matrixa, self._matrixb, self._ringa, self._ringb)
+
         while True:
             self._loop()
 
@@ -86,23 +90,7 @@ class DemistarTicker(RingsProviderInterface):
         if hasattr(self, "_server"):
             self._server.handle()
 
-            timestamp = time.localtime()
-            if timestamp[5] != self._last_sec:
-                self._matrixa.clear()
-                self._matrixa.draw_text(
-                    "{3:02}:{4:02}:{5:02}".format(*timestamp))
-                self._matrixa.update()
-
-                self._matrixb.clear()
-                self._matrixb.draw_text(WEEKDAYS[timestamp[6]])
-                self._matrixb.update()
-
-                self._ringb._strip.fill((0, 0, 0))
-                self._ringb._strip.set_pixel_line(0, round((timestamp[3] % 12) * 16 / 12), (3, 0, 2))
-                self._ringb._strip.set_pixel_line(16, 16 + round(timestamp[4] * 16 / 60), (3, 2, 0))
-                self._ringb._strip.show()
-
-                self._last_sec = timestamp[5]
+        self._stage.update()
 
     def get_matrix(self, index: int) -> MatrixDisplay:
         if index == 0:
