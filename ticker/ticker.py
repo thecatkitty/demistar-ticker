@@ -68,7 +68,7 @@ class DemistarTicker(RingsProviderInterface):
         self._server = WebServer(port)
         self._server.add_provider(
             "^/$", StaticPageProvider("text/html", "<h1>It works!</h1>".encode()))
-        self._server.add_provider("^/ring", ApiProvider({
+        self._server.add_provider("^/", ApiProvider({
             "rings_provider": self
         }))
         return "{host}:{port}".format(host=self._net.ifconfig()[0], port=port)
@@ -86,7 +86,7 @@ class DemistarTicker(RingsProviderInterface):
         if hasattr(self, "_server"):
             self._server.handle()
 
-            timestamp = time.localtime(time.time() + TZ_OFFSET)
+            timestamp = time.localtime()
             if timestamp[5] != self._last_sec:
                 self._matrixa.clear()
                 self._matrixa.draw_text("{3:02}:{4:02}:{5:02}".format(*timestamp))

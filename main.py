@@ -1,7 +1,10 @@
 import ntptime
+import time
 
 from config import *
 from ticker import DemistarTicker
+
+from machine import RTC
 
 
 app = DemistarTicker()
@@ -25,6 +28,9 @@ else:
     app.get_matrix(1).draw_text(addr.split(":")[0])
 
     ntptime.settime()
+    timestamp = time.localtime(time.time() + TZ_OFFSET)
+    RTC().datetime((timestamp[0], timestamp[1], timestamp[2],
+                    0, timestamp[3], timestamp[4], timestamp[5], 0))
 
 app.get_matrix(1).update()
 
