@@ -32,8 +32,14 @@ class WallclockStage:
             "{3:02}:{4:02}:{5:02}".format(*timestamp))
         self._top.update()
 
+        bottom_text = WEEKDAYS[timestamp[6]]
+        if self._last_sec >= 45:
+            bottom_text = FMT_DATE.format(
+                month_name=MONTHS[timestamp[1] - 1],
+                day=timestamp[2])
+
         self._bottom.clear()
-        self._bottom.draw_text(WEEKDAYS[timestamp[6]], x=-1)
+        self._bottom.draw_text(bottom_text, x=-1)
         self._bottom.update()
 
         minute_hand = round((timestamp[3] % 12) * 16 / 12)
