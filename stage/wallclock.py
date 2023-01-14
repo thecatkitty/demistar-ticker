@@ -33,7 +33,7 @@ class WallclockStage:
         self._top.update()
 
         self._bottom.clear()
-        self._bottom.draw_text(WEEKDAYS[timestamp[6]])
+        self._bottom.draw_text(WEEKDAYS[timestamp[6]], x=-1)
         self._bottom.update()
 
         minute_hand = round((timestamp[3] % 12) * 16 / 12)

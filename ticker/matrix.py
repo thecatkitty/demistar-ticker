@@ -24,6 +24,10 @@ class MatrixDisplay:
 
         pixels = b"\0".join(font[ord(c)] for c in text)
         fbuf = FrameBuffer(bytearray(pixels), len(pixels), 8, MONO_VLSB)
+
+        if x < 0:
+            x = 65 + x - len(pixels)
+
         self._ctl.blit(fbuf, x, 0)
         return fbuf
 
