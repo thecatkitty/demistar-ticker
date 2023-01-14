@@ -4,8 +4,10 @@ from config import *
 from ticker.matrix import MatrixDisplay
 from ticker.ring import Ring
 
+from .base import Stage
 
-class WallclockStage:
+
+class WallclockStage(Stage):
     _top: MatrixDisplay
     _bottom: MatrixDisplay
     _inner: Ring
@@ -19,10 +21,10 @@ class WallclockStage:
         self._outer = outer_ring
         self._last_sec = -1
 
-    def show(self):
+    def show(self) -> None:
         self._last_sec = -1
 
-    def update(self):
+    def update(self) -> None:
         timestamp = time.localtime()
         if timestamp[5] == self._last_sec:
             return

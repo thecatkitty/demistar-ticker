@@ -5,28 +5,25 @@ from api import ApiProvider
 from config import *
 from controller.ring import RingsProviderInterface
 from http import WebServer, StaticPageProvider
-from stage.wallclock import WallclockStage
+from stage import WallclockStage
 
 from driver.neopixel import Neopixel
 
 from .cefo import CelonesFont
 from .ring import Ring
+from .manager import StageManager
 from .matrix import MatrixDisplay
 
 
 class DemistarTicker(RingsProviderInterface):
-    _net: network.WLAN
     _server: WebServer
+    _manager: StageManager
+    _rings_changed: bool
 
     _top: MatrixDisplay
     _bottom: MatrixDisplay
-    _strip: Neopixel
-    _rings_changed: bool
-
     _inner: Ring
     _outer: Ring
-
-    _stage: WallclockStage
 
     def __init__(self, top_display: MatrixDisplay, bottom_display: MatrixDisplay, inner_ring: Ring, outer_ring: Ring) -> None:
         self._top = top_display
@@ -38,6 +35,7 @@ class DemistarTicker(RingsProviderInterface):
         self._top.font = font
         self._bottom.font = font
 
+        self._manager = StageManager()
         self._rings_changed = False
 
     def run(self, port: int) -> None:
@@ -49,8 +47,8 @@ class DemistarTicker(RingsProviderInterface):
         }))
 
         print("ticker: setting the stage")
-        self._stage = WallclockStage(
-            self._top, self._bottom, self._inner, self._outer)
+        self._manager.set_stage(WallclockStage(
+            self._top, self._bottom, self._inner, self._outer))
 
         while True:
             self._loop()
@@ -64,7 +62,7 @@ class DemistarTicker(RingsProviderInterface):
         if hasattr(self, "_server"):
             self._server.handle()
 
-        self._stage.update()
+        self._manager.handle()
 
     # Implementation of RingsProviderInterface
     def get_ring(self, index: int) -> Ring:
