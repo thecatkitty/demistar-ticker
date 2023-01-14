@@ -58,7 +58,7 @@ class DemistarTicker(RingsProviderInterface):
             self._matrixb = matrix
 
     def init_rings(self, length: int, pin: int) -> None:
-        self._strip = Neopixel(length, 0, pin, "GRB", delay=0.005)
+        self._strip = Neopixel(length, 0, pin, "GRB", delay=0.001)
         self._ringa = Ring(self._strip, 0, 16)
         self._ringb = Ring(self._strip, 16, 16)
         self._strip.clear()
