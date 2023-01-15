@@ -1,24 +1,16 @@
 import time
 
 from config import *
-from ticker.matrix import MatrixDisplay
-from ticker.ring import Ring
 
-from .base import Stage
+from .base import Board, Stage
 
 
 class WallclockStage(Stage):
-    _top: MatrixDisplay
-    _bottom: MatrixDisplay
-    _inner: Ring
-    _outer: Ring
+    _b: Board
     _last_sec: int
 
-    def __init__(self, top_display: MatrixDisplay, bottom_display: MatrixDisplay, inner_ring: Ring, outer_ring: Ring) -> None:
-        self._top = top_display
-        self._bottom = bottom_display
-        self._inner = inner_ring
-        self._outer = outer_ring
+    def __init__(self, board: Board) -> None:
+        self._b = board
         self._last_sec = -1
 
     def show(self) -> None:
@@ -30,27 +22,27 @@ class WallclockStage(Stage):
             return
 
         if timestamp[0] < 2023:
-            self._top.clear()
-            self._top.draw_text("wrong date")
-            self._top.update()
+            self._b.top.clear()
+            self._b.top.draw_text("wrong date")
+            self._b.top.update()
 
-            self._bottom.clear()
-            self._bottom.draw_text("POST wallclock")
-            self._bottom.update()
+            self._b.bottom.clear()
+            self._b.bottom.draw_text("POST wallclock")
+            self._b.bottom.update()
 
             if timestamp[5] % 2 == 0:
-                self._inner.fill(3, 1, 0, False)
-                self._outer.fill(0, 0, 0, False)
+                self._b.inner.fill(3, 1, 0, False)
+                self._b.outer.fill(0, 0, 0, False)
             else:
-                self._inner.fill(0, 0, 0, False)
-                self._outer.fill(3, 1, 0, False)
-            self._inner.update()
+                self._b.inner.fill(0, 0, 0, False)
+                self._b.outer.fill(3, 1, 0, False)
+            self._b.inner.update()
             return
 
-        self._top.clear()
-        self._top.draw_text(
+        self._b.top.clear()
+        self._b.top.draw_text(
             "{3:02}:{4:02}:{5:02}".format(*timestamp))
-        self._top.update()
+        self._b.top.update()
 
         bottom_text = WEEKDAYS[timestamp[6]]
         if self._last_sec >= 45:
@@ -58,17 +50,17 @@ class WallclockStage(Stage):
                 month_name=MONTHS[timestamp[1] - 1],
                 day=timestamp[2])
 
-        self._bottom.clear()
-        self._bottom.draw_text(bottom_text, x=-1)
-        self._bottom.update()
+        self._b.bottom.clear()
+        self._b.bottom.draw_text(bottom_text, x=-1)
+        self._b.bottom.update()
 
         minute_hand = round(timestamp[4] * 16 / 60)
-        self._inner.fill(0, 0, 0, False)
-        self._inner.put_line(3, 0, 2, 0, minute_hand, False)
+        self._b.inner.fill(0, 0, 0, False)
+        self._b.inner.put_line(3, 0, 2, 0, minute_hand, False)
 
         hour_hand = round((timestamp[3] % 12) * 16 / 12)
-        self._outer.fill(0, 0, 0, False)
-        self._outer.put_line(3, 2, 0, 0, hour_hand, False)
+        self._b.outer.fill(0, 0, 0, False)
+        self._b.outer.put_line(3, 2, 0, 0, hour_hand, False)
 
-        self._inner.update()
+        self._b.inner.update()
         self._last_sec = timestamp[5]

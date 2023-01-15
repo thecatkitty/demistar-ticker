@@ -5,7 +5,7 @@ from api import ApiProvider
 from config import *
 from controller.ring import RingsProviderInterface
 from http import WebServer, StaticPageProvider
-from stage import WallclockStage
+from stage import Board, WallclockStage
 
 from driver.neopixel import Neopixel
 
@@ -47,8 +47,8 @@ class DemistarTicker(RingsProviderInterface):
         }))
 
         print("ticker: setting the stage")
-        self._manager.set_stage(WallclockStage(
-            self._top, self._bottom, self._inner, self._outer))
+        board = Board(self._top, self._bottom, self._inner, self._outer)
+        self._manager.set_stage(WallclockStage(board))
 
         while True:
             self._loop()
