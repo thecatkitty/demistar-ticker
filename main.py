@@ -1,5 +1,4 @@
 import network
-import ntptime
 import time
 
 from config import *
@@ -63,10 +62,5 @@ if status != network.STAT_GOT_IP:
 # We're connected!
 print("net: address {}".format(net.ifconfig()[0]))
 inner_ring.fill(0, 64, 0)
-
-ntptime.settime()
-timestamp = time.localtime(time.time() + TZ_OFFSET)
-RTC().datetime((timestamp[0], timestamp[1], timestamp[2],
-                0, timestamp[3], timestamp[4], timestamp[5], 0))
 
 app.run(2137)

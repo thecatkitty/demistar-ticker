@@ -29,6 +29,24 @@ class WallclockStage(Stage):
         if timestamp[5] == self._last_sec:
             return
 
+        if timestamp[0] < 2023:
+            self._top.clear()
+            self._top.draw_text("wrong date")
+            self._top.update()
+
+            self._bottom.clear()
+            self._bottom.draw_text("POST wallclock")
+            self._bottom.update()
+
+            if timestamp[5] % 2 == 0:
+                self._inner.fill(3, 1, 0, False)
+                self._outer.fill(0, 0, 0, False)
+            else:
+                self._inner.fill(0, 0, 0, False)
+                self._outer.fill(3, 1, 0, False)
+            self._inner.update()
+            return
+
         self._top.clear()
         self._top.draw_text(
             "{3:02}:{4:02}:{5:02}".format(*timestamp))
