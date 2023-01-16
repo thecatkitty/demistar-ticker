@@ -18,18 +18,21 @@ class MatrixDisplay:
     def clear(self) -> None:
         self._ctl.fill(0)
 
-    def draw_text(self, text: str, font=None, x: int = 0) -> FrameBuffer:
+    def draw(self, fbuf: FrameBuffer, x: int = 0) -> None:
+        self._ctl.blit(fbuf, x, 0)
+
+    def draw_text(self, text: str, font=None, x: int = 0) -> None:
         if font is None:
             font = self.font
 
-        pixels = b"\0".join(font[ord(c)] for c in text)
-        fbuf = FrameBuffer(bytearray(pixels), len(pixels), 8, MONO_VLSB)
+        pixels = font.print(text)
+        if pixels is None:
+            return
 
         if x < 0:
             x = 65 + x - len(pixels)
 
-        self._ctl.blit(fbuf, x, 0)
-        return fbuf
+        self.draw(FrameBuffer(pixels, len(pixels), 8, MONO_VLSB), x)
 
     def update(self) -> None:
         self._ctl.show()
