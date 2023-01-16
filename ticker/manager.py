@@ -11,4 +11,8 @@ class StageManager:
         self._current.update()
 
     def set_stage(self, stage: Stage):
+        if stage == self._current:
+            pass
+
         self._current = stage
+        self._current.show()

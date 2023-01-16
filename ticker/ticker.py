@@ -5,7 +5,7 @@ from api import ApiProvider
 from config import *
 from controller.ring import RingsProviderInterface
 from http import WebServer, StaticPageProvider
-from stage import Board, WallclockStage
+from stage import Board, ManualStage, WallclockStage
 
 from driver.neopixel import Neopixel
 
@@ -19,21 +19,18 @@ class DemistarTicker(RingsProviderInterface):
     _server: WebServer
     _manager: StageManager
     _rings_changed: bool
+    _board: Board
 
-    _top: MatrixDisplay
-    _bottom: MatrixDisplay
-    _inner: Ring
-    _outer: Ring
+    _wallclock: WallclockStage
+    _manual: ManualStage
 
     def __init__(self, top_display: MatrixDisplay, bottom_display: MatrixDisplay, inner_ring: Ring, outer_ring: Ring) -> None:
-        self._top = top_display
-        self._bottom = bottom_display
-        self._inner = inner_ring
-        self._outer = outer_ring
+        self._board = Board(top_display, bottom_display,
+                            inner_ring, outer_ring)
 
         font = CelonesFont("/ticker/Gidotto8.cefo")
-        self._top.font = font
-        self._bottom.font = font
+        self._board.top.font = font
+        self._board.bottom.font = font
 
         self._manager = StageManager()
         self._rings_changed = False
@@ -46,17 +43,27 @@ class DemistarTicker(RingsProviderInterface):
             "rings_provider": self
         }))
 
-        print("ticker: setting the stage")
-        board = Board(self._top, self._bottom, self._inner, self._outer)
-        self._manager.set_stage(WallclockStage(board))
+        self._wallclock = WallclockStage(self._board)
+
+        self._manual = ManualStage(self._board)
+        self._manual.top = "Lorem ipsum dolor sit amet, consectetur " \
+            "adipiscing elit, sed do eiusmod tempor incididunt ut labore " \
+            "et dolore magna aliqua."
+        self._manual.bottom = "The quick brown fox jumps over the lazy dog."
+        self._manual.outer = 64, 0, 32, 750
 
         while True:
             self._loop()
 
     def _loop(self) -> None:
+        if time.localtime()[5] == 0:
+            self._manager.set_stage(self._manual)
+        elif time.localtime()[5] == 15:
+            self._manager.set_stage(self._wallclock)
+
         if self._rings_changed:
             time.sleep_ms(150)
-            self._bottom.update()
+            self._board.bottom.update()
             self._rings_changed = False
 
         if hasattr(self, "_server"):
@@ -66,7 +73,7 @@ class DemistarTicker(RingsProviderInterface):
 
     # Implementation of RingsProviderInterface
     def get_ring(self, index: int) -> Ring:
-        return self._inner if index == 0 else self._outer
+        return self._board.inner if index == 0 else self._board.outer
 
     def rings_changed(self) -> None:
         self._rings_changed = True
