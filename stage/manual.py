@@ -1,4 +1,5 @@
-from . import fxdisp, fxring
+from effects import display as dfx
+from effects import ring as rfx
 from .base import Board, Stage
 
 
@@ -9,10 +10,10 @@ class ManualStage(Stage):
     outer: tuple[int, int, int, int]
 
     _b: Board
-    _top: fxdisp.Marquee
-    _bottom: fxdisp.Marquee
-    _inner: fxring.RingEffect
-    _outer: fxring.RingEffect
+    _top: dfx.Marquee
+    _bottom: dfx.Marquee
+    _inner: rfx.RingEffect
+    _outer: rfx.RingEffect
 
     def __init__(self, board: Board) -> None:
         self._b = board
@@ -22,10 +23,10 @@ class ManualStage(Stage):
         self.outer = (64, 64, 64, 500)
 
     def show(self) -> None:
-        self._top = fxdisp.Marquee(self._b.top, self._b.top.font.print(self.top))
-        self._bottom = fxdisp.Marquee(self._b.bottom, self._b.bottom.font.print(self.bottom))
-        self._inner = fxring.Blink(self._b.inner, self.inner[:3], self.inner[3])
-        self._outer = fxring.Breath(self._b.outer, self.outer[:3], self.outer[3])
+        self._top = dfx.Marquee(self._b.top, self._b.top.font.print(self.top))
+        self._bottom = dfx.Marquee(self._b.bottom, self._b.bottom.font.print(self.bottom))
+        self._inner = rfx.Blink(self._b.inner, self.inner[:3], self.inner[3])
+        self._outer = rfx.Breath(self._b.outer, self.outer[:3], self.outer[3])
 
         self._top.start()
         self._bottom.start()
