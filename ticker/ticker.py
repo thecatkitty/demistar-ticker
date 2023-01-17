@@ -47,7 +47,7 @@ class DemistarTicker(RingsProviderInterface):
             "adipiscing elit, sed do eiusmod tempor incididunt ut labore " \
             "et dolore magna aliqua."
         manual.bottom = "The quick brown fox jumps over the lazy dog."
-        manual.outer = 64, 0, 32, 2000
+        manual.outer = "breath", 64, 0, 32, 2000
 
         self._manager.stages.append((15, manual))
         self._manager.stages.append((45, wallclock))
