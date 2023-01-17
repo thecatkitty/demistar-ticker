@@ -50,7 +50,7 @@ class DemistarTicker(RingsProviderInterface):
             "adipiscing elit, sed do eiusmod tempor incididunt ut labore " \
             "et dolore magna aliqua."
         self._manual.bottom = "The quick brown fox jumps over the lazy dog."
-        self._manual.outer = 64, 0, 32, 750
+        self._manual.outer = 64, 0, 32, 2000
 
         while True:
             self._loop()

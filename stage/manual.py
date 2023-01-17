@@ -11,8 +11,8 @@ class ManualStage(Stage):
     _b: Board
     _top: fxdisp.Marquee
     _bottom: fxdisp.Marquee
-    _inner: fxring.Blink
-    _outer: fxring.Blink
+    _inner: fxring.RingEffect
+    _outer: fxring.RingEffect
 
     def __init__(self, board: Board) -> None:
         self._b = board
@@ -25,7 +25,7 @@ class ManualStage(Stage):
         self._top = fxdisp.Marquee(self._b.top, self._b.top.font.print(self.top))
         self._bottom = fxdisp.Marquee(self._b.bottom, self._b.bottom.font.print(self.bottom))
         self._inner = fxring.Blink(self._b.inner, self.inner[:3], self.inner[3])
-        self._outer = fxring.Blink(self._b.outer, self.outer[:3], self.outer[3])
+        self._outer = fxring.Breath(self._b.outer, self.outer[:3], self.outer[3])
 
         self._top.start()
         self._bottom.start()
