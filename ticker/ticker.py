@@ -21,9 +21,6 @@ class DemistarTicker(RingsProviderInterface):
     _rings_changed: bool
     _board: Board
 
-    _wallclock: WallclockStage
-    _manual: ManualStage
-
     def __init__(self, top_display: MatrixDisplay, bottom_display: MatrixDisplay, inner_ring: Ring, outer_ring: Ring) -> None:
         self._board = Board(top_display, bottom_display,
                             inner_ring, outer_ring)
@@ -43,24 +40,22 @@ class DemistarTicker(RingsProviderInterface):
             "rings_provider": self
         }))
 
-        self._wallclock = WallclockStage(self._board)
+        wallclock = WallclockStage(self._board)
 
-        self._manual = ManualStage(self._board)
-        self._manual.top = "Lorem ipsum dolor sit amet, consectetur " \
+        manual = ManualStage(self._board)
+        manual.top = "Lorem ipsum dolor sit amet, consectetur " \
             "adipiscing elit, sed do eiusmod tempor incididunt ut labore " \
             "et dolore magna aliqua."
-        self._manual.bottom = "The quick brown fox jumps over the lazy dog."
-        self._manual.outer = 64, 0, 32, 2000
+        manual.bottom = "The quick brown fox jumps over the lazy dog."
+        manual.outer = 64, 0, 32, 2000
+
+        self._manager.stages.append((15, manual))
+        self._manager.stages.append((45, wallclock))
 
         while True:
             self._loop()
 
     def _loop(self) -> None:
-        if time.localtime()[5] == 0:
-            self._manager.set_stage(self._manual)
-        elif time.localtime()[5] == 15:
-            self._manager.set_stage(self._wallclock)
-
         if self._rings_changed:
             time.sleep_ms(150)
             self._board.bottom.update()
