@@ -12,6 +12,14 @@ class TimelineItem:
     def __str__(self) -> str:
         return "{} {}".format(self.screentime, self.stage)
 
+    def to_dict(self) -> dict:
+        return {
+            "start": self.start,
+            "duration": self.duration,
+            "screentime": self.screentime,
+            "stage": self.stage.to_dict()
+        }
+
 
 class StageManager:
     timeline: list[TimelineItem]

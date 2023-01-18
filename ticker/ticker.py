@@ -7,8 +7,6 @@ from controller.ring import RingsProviderInterface
 from http import WebServer, StaticPageProvider
 from stage import Board, ManualStage, WallclockStage
 
-from driver.neopixel import Neopixel
-
 from .cefo import CelonesFont
 from .ring import Ring
 from .manager import StageManager
@@ -37,7 +35,8 @@ class DemistarTicker(RingsProviderInterface):
         self._server.add_provider(
             "^/$", StaticPageProvider("text/html", "<h1>It works!</h1>".encode()))
         self._server.add_provider("^/", ApiProvider({
-            "rings_provider": self
+            "rings_provider": self,
+            "stage_manager": self._manager
         }))
 
         wallclock = WallclockStage(self._board)

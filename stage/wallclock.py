@@ -64,3 +64,8 @@ class WallclockStage(Stage):
 
         self._b.inner.update()
         self._last_sec = timestamp[5]
+
+    def to_dict(self) -> dict:
+        return {
+            "name": "wallclock"
+        }

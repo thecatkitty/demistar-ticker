@@ -47,3 +47,12 @@ class ManualStage(Stage):
         self._bottom.update()
         self._inner.update()
         self._outer.update()
+
+    def to_dict(self) -> dict:
+        return {
+            "name": "manual",
+            "top": self.top,
+            "bottom": self.bottom,
+            "inner": self.inner,
+            "outer": self.outer
+        }

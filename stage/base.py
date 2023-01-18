@@ -9,6 +9,9 @@ class Stage:
     def update(self) -> None:
         pass
 
+    def to_dict(self) -> dict:
+        return dict()
+
 
 class Board:
     top: MatrixDisplay
