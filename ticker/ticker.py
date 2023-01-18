@@ -49,8 +49,8 @@ class DemistarTicker(RingsProviderInterface):
         manual.bottom = "The quick brown fox jumps over the lazy dog."
         manual.outer = "breath", 64, 0, 32, 2000
 
-        self._manager.stages.append((15, manual))
-        self._manager.stages.append((45, wallclock))
+        self._manager.add_stage(15, manual)
+        self._manager.add_stage(45, wallclock)
 
         while True:
             self._loop()
