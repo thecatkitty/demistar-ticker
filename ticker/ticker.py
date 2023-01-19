@@ -3,7 +3,6 @@ import time
 
 from api import ApiProvider
 from config import *
-from controller.ring import RingsProviderInterface
 from http import WebServer, StaticPageProvider
 from stage import Board, ManualStage, WallclockStage
 
@@ -13,7 +12,7 @@ from .manager import StageManager
 from .matrix import MatrixDisplay
 
 
-class DemistarTicker(RingsProviderInterface):
+class DemistarTicker:
     _server: WebServer
     _manager: StageManager
     _rings_changed: bool
@@ -64,10 +63,3 @@ class DemistarTicker(RingsProviderInterface):
             self._server.handle()
 
         self._manager.handle()
-
-    # Implementation of RingsProviderInterface
-    def get_ring(self, index: int) -> Ring:
-        return self._board.inner if index == 0 else self._board.outer
-
-    def rings_changed(self) -> None:
-        self._rings_changed = True
