@@ -6,8 +6,8 @@ from .base import Board, Stage
 class ManualStage(Stage):
     top: str
     bottom: str
-    inner: tuple[str, int, int, int, int]
-    outer: tuple[str, int, int, int, int]
+    inner: tuple
+    outer: tuple
 
     _b: Board
     _top: dfx.Marquee
@@ -19,8 +19,8 @@ class ManualStage(Stage):
         self._b = board
         self.top = ""
         self.bottom = ""
-        self.inner = "blink", 64, 64, 64, 500
-        self.outer = "blink", 64, 64, 64, 500
+        self.inner = "color", 0, 0, 0
+        self.outer = "color", 0, 0, 0
 
     def show(self) -> None:
         self._top = dfx.Marquee(self._b.top, self._b.top.font.print(self.top))
@@ -29,12 +29,12 @@ class ManualStage(Stage):
         self._inner = rfx.create(
             ring=self._b.inner,
             name=self.inner[0],
-            args=self.inner[1:-1],
+            args=self.inner[1:-1] if self.inner[0] != "color" else self.inner[1:],
             time_ms=self.inner[-1])
         self._outer = rfx.create(
             ring=self._b.outer,
             name=self.outer[0],
-            args=self.outer[1:-1],
+            args=self.outer[1:-1] if self.outer[0] != "color" else self.outer[1:],
             time_ms=self.outer[-1])
 
         self._top.start()

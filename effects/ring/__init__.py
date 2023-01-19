@@ -2,10 +2,12 @@ from ticker.ring import Ring
 from .base import RingEffect
 from .blink import Blink
 from .breath import Breath
+from .color import Color
 
 registry = {
     "blink": Blink,
-    "breath": Breath
+    "breath": Breath,
+    "color": Color
 }
 
 
