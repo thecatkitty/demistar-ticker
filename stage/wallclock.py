@@ -69,3 +69,7 @@ class WallclockStage(Stage):
         return {
             "name": "wallclock"
         }
+    
+    @staticmethod
+    def from_dict(board: Board, o: dict) -> object:
+        return WallclockStage(board)

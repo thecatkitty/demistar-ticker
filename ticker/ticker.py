@@ -4,7 +4,7 @@ import time
 from api import ApiProvider
 from config import *
 from http import WebServer, StaticPageProvider
-from stage import Board, ManualStage, WallclockStage
+from stage import Board, WallclockStage
 
 from .cefo import CelonesFont
 from .ring import Ring
@@ -34,20 +34,11 @@ class DemistarTicker:
         self._server.add_provider(
             "^/$", StaticPageProvider("text/html", "<h1>It works!</h1>".encode()))
         self._server.add_provider("^/", ApiProvider({
-            "rings_provider": self,
+            "board": self._board,
             "stage_manager": self._manager
         }))
 
         wallclock = WallclockStage(self._board)
-
-        manual = ManualStage(self._board)
-        manual.top = "Lorem ipsum dolor sit amet, consectetur " \
-            "adipiscing elit, sed do eiusmod tempor incididunt ut labore " \
-            "et dolore magna aliqua."
-        manual.bottom = "The quick brown fox jumps over the lazy dog."
-        manual.outer = "breath", 64, 0, 32, 2000
-
-        self._manager.add_stage(15, manual)
         self._manager.add_stage(45, wallclock)
 
         while True:

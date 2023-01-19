@@ -29,12 +29,14 @@ class ManualStage(Stage):
         self._inner = rfx.create(
             ring=self._b.inner,
             name=self.inner[0],
-            args=self.inner[1:-1] if self.inner[0] != "color" else self.inner[1:],
+            args=self.inner[1:-1] if self.inner[0] != "color"
+                else self.inner[1:],
             time_ms=self.inner[-1])
         self._outer = rfx.create(
             ring=self._b.outer,
             name=self.outer[0],
-            args=self.outer[1:-1] if self.outer[0] != "color" else self.outer[1:],
+            args=self.outer[1:-1] if self.outer[0] != "color"
+                else self.outer[1:],
             time_ms=self.outer[-1])
 
         self._top.start()
@@ -56,3 +58,25 @@ class ManualStage(Stage):
             "inner": self.inner,
             "outer": self.outer
         }
+
+    @staticmethod
+    def from_dict(board: Board, o: dict) -> object:
+        stage = ManualStage(board)
+
+        top = o.get("top")
+        if type(top) is str:
+            stage.top = top
+
+        bottom = o.get("bottom")
+        if type(bottom) is str:
+            stage.bottom = bottom
+
+        inner = o.get("inner")
+        if type(inner) is list:
+            stage.inner = tuple(inner)
+
+        outer = o.get("outer")
+        if type(outer) is list:
+            stage.outer = tuple(outer)
+
+        return stage
