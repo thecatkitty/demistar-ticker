@@ -1,5 +1,6 @@
 import utime
 
+from api import convert
 from stage import Stage
 
 
@@ -14,7 +15,7 @@ class TimelineItem:
 
     def to_dict(self) -> dict:
         return {
-            "start": self.start,
+            "start": convert.time_to_string(self.start),
             "duration": self.duration,
             "screentime": self.screentime,
             "stage": self.stage.to_dict()
@@ -58,7 +59,8 @@ class StageManager:
     def _next_stage(self) -> None:
         self._index += 1
         if self._index >= len(self.cycle):
-            print("manager: cycle {} end".format(self._cycle_start))
+            print("manager: cycle {} end".format(
+                convert.time_to_string(self._cycle_start)))
             return
 
         self._set_stage(self._index)

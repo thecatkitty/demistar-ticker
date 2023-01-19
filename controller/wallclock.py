@@ -1,7 +1,7 @@
 import json
-import time
+import utime
 
-from api import ErrorView, JsonView
+from api import ErrorView, JsonView, convert
 from config import *
 from http import HttpRequest, HttpResponse
 
@@ -17,10 +17,8 @@ class WallclockController:
     def get(self, request: HttpRequest) -> HttpResponse:
         print("api.wallclock: get")
 
-        timestamp = time.localtime()
         return JsonView({
-            "date": timestamp[:3],
-            "time": timestamp[3:6]
+            "time": convert.time_to_string(utime.time())
         }).render()
 
     def post(self, request: HttpRequest) -> HttpResponse:
@@ -33,23 +31,19 @@ class WallclockController:
         if type(data) is not dict:
             return ErrorView(422, "Payload is expected to be a dict").render()
 
-        date = data.get("date")
         time = data.get("time")
 
-        if type(date) is not list:
-            return ErrorView(422, "'date' is expected to be a list").render()
+        if type(time) is not str:
+            return ErrorView(422, "'time' is expected to be a string").render()
 
-        if type(time) is not list:
-            return ErrorView(422, "'time' is expected to be a list").render()
+        try:
+            timestamp = convert.string_to_time(time)
+            year, month, mday, hour, minute, second, _, _ = utime.localtime(
+                timestamp)
 
-        if len(date) != 3:
-            return ErrorView(422, "'date' length is expected to be 3").render()
+            print("api.wallclock: {}".format(time))
+            RTC().datetime((year, month, mday, 0, hour, minute, second, 0))
+        except ValueError as ve:
+            return ErrorView(422, str(ve)).render()
 
-        if len(time) != 3:
-            return ErrorView(422, "'time' length is expected to be 3").render()
-
-        print(
-            "api.wallclock: {:04}-{:02}-{:02} {:02}:{:02}:{:02}".format(*date, *time))
-        RTC().datetime((date[0], date[1], date[2],
-                        0, time[0], time[1], time[2], 0))
         return JsonView({}).render()
