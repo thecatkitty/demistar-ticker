@@ -2,6 +2,7 @@ import time
 
 from config import *
 
+import lang
 from .base import Board, Stage
 
 
@@ -44,10 +45,10 @@ class WallclockStage(Stage):
             "{3:02}:{4:02}:{5:02}".format(*timestamp))
         self._b.top.update()
 
-        bottom_text = WEEKDAYS[timestamp[6]]
+        bottom_text = lang.WEEKDAYS[timestamp[6]]
         if self._last_sec >= 45:
-            bottom_text = FMT_DATE.format(
-                month_name=MONTHS[timestamp[1] - 1],
+            bottom_text = lang.FMT_DATE.format(
+                month_name=lang.MONTHS[timestamp[1] - 1],
                 day=timestamp[2])
 
         self._b.bottom.clear()
