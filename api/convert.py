@@ -1,3 +1,4 @@
+import json
 import utime
 
 
@@ -25,3 +26,35 @@ def string_to_time(string: str) -> int:
     year, month, mday = date_parts
     hour, minute, second = time_parts
     return utime.mktime((int(year), int(month), int(mday), int(hour), int(minute), int(second), 0, 0))
+
+
+def to_json_bytes(node: object):
+    if type(node) is dict:
+        yield "{".encode()
+
+        for i, item in enumerate(node.items()):
+            if i != 0:
+                yield ",".encode()
+
+            key, value = item
+            yield (json.dumps(str(key)) + ":").encode()
+
+            for chunk in to_json_bytes(value):
+                yield chunk
+
+        yield "}".encode()
+
+    elif type(node) is list:
+        yield "[".encode()
+
+        for i, item in enumerate(node):
+            if i != 0:
+                yield ",".encode()
+
+            for chunk in to_json_bytes(item):
+                yield chunk
+
+        yield "]".encode()
+
+    else:
+        yield json.dumps(node).encode()
