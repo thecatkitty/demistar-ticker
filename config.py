@@ -1,3 +1,5 @@
+import json
+
 MATRIXA_SPI = 1
 MATRIXA_SCK = 14
 MATRIXA_MOSI = 15
@@ -12,9 +14,9 @@ RING_PIXELS = 16
 RINGS = 2
 RINGS_PIN = 9
 
-IF_SSID = 'SSID'
-IF_PSK = 'PSK'
-IF_TRY = 10
-
 TZ_OFFSET = +1 * 60 * 60
 LANG = 'en'
+
+LOCAL = dict()
+with open('demistar.conf', 'r') as file:
+    LOCAL = json.load(file)

@@ -31,13 +31,13 @@ bottom_display.update()
 # Going online
 net = network.WLAN(network.STA_IF)
 net.active(True)
-net.connect(IF_SSID, IF_PSK)
+net.connect(LOCAL["wlan"]["ssid"], LOCAL["wlan"]["psk"])
 
-for i in range(IF_TRY):
+for i in range(LOCAL["wlan"]["retries"]):
     if net.status() >= network.STAT_GOT_IP:
         break
 
-    print("net: connecting ({}/{})".format(i + 1, IF_TRY))
+    print("net: connecting ({}/{})".format(i + 1, LOCAL["wlan"]["retries"]))
     inner_ring[i] = 0, 0, 64
     time.sleep(1)
 

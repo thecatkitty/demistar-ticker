@@ -1,0 +1,7 @@
+{
+    "wlan": {
+        "ssid": "<your network's SSID>",
+        "psk": "<your network's pre-shared key>",
+        "retries": 10
+    }
+}
