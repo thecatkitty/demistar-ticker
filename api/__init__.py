@@ -1,5 +1,4 @@
 from .provider import ApiProvider
-from .basic import BasicView
-from .json import JsonView
-from .error import ErrorView
+from .json import JsonResponse
+from .error import ErrorResponse
 from . import convert

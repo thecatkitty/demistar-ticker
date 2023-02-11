@@ -1,4 +1,4 @@
-from api import JsonView
+from api import JsonResponse
 from config import *
 from effects import display as dfx
 from effects import ring as rfx
@@ -14,7 +14,7 @@ class EffectsController:
     def get(self, request: WebRequest) -> WebResponse:
         print("api.effects: get")
 
-        return JsonView({
+        return JsonResponse({
             "display": [key for key in dfx.registry.keys()],
             "ring": [key for key in rfx.registry.keys()]
-        }).render()
+        })

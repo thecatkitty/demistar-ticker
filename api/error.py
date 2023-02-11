@@ -1,7 +1,7 @@
-from .json import JsonView
+from .json import JsonResponse
 
 
-class ErrorView(JsonView):
+class ErrorResponse(JsonResponse):
     def __init__(self, status: int, message: str) -> None:
         super().__init__({
             "error": message

@@ -1,6 +1,6 @@
 import json
 
-from api import ErrorView, JsonView, convert
+from api import ErrorResponse, JsonResponse, convert
 from web import WebRequest, WebResponse
 
 from stage.base import Board
@@ -21,20 +21,20 @@ class TimelineController:
 
     def get(self, request: WebRequest) -> WebResponse:
         print("api.timeline: get")
-        return JsonView({
+        return JsonResponse({
             "backlog": [item.to_dict() for item in self._manager.timeline],
             "cycle": [item.to_dict() for item in self._manager.cycle]
-        }).render()
+        })
 
     def post(self, request: WebRequest) -> WebResponse:
         print("api.timeline: post")
         try:
             data = json.loads(request.data.decode())
         except ValueError as ve:
-            return ErrorView(422, str(ve)).render()
+            return ErrorResponse(422, str(ve))
 
         if type(data) is not dict:
-            return ErrorView(422, "Payload is expected to be a dict").render()
+            return ErrorResponse(422, "Payload is expected to be a dict")
 
         start = data.get("start")
         try:
@@ -48,15 +48,15 @@ class TimelineController:
 
         screentime = data.get("screentime")
         if type(screentime) is not int:
-            return ErrorView(422, "'screentime' is expected to be an integer").render()
+            return ErrorResponse(422, "'screentime' is expected to be an integer")
 
         stage = data.get("stage")
         if type(stage) is not dict:
-            return ErrorView(422, "'stage' is expected to be an dict").render()
+            return ErrorResponse(422, "'stage' is expected to be an dict")
 
         stage_name = stage.get("name")
         if type(stage_name) is not str:
-            return ErrorView(422, "'stage.name' is expected to be a string").render()
+            return ErrorResponse(422, "'stage.name' is expected to be a string")
 
         if stage_name == "manual":
             stage = ManualStage.from_dict(self._board, stage)  # type: ignore
@@ -64,8 +64,8 @@ class TimelineController:
             stage = WallclockStage.from_dict(
                 self._board, stage)  # type: ignore
         else:
-            return ErrorView(422, "unknown 'stage.name'").render()
+            return ErrorResponse(422, "unknown 'stage.name'")
 
         self._manager.add_stage(screentime, stage, start,  # type: ignore
                                 duration)
-        return JsonView({}).render()
+        return JsonResponse({})
