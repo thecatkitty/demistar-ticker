@@ -56,5 +56,17 @@ def to_json_bytes(node: object):
 
         yield "]".encode()
 
+    elif callable(node):
+        yield "[".encode()
+
+        for i, item in enumerate(node()):
+            if i != 0:
+                yield ",".encode()
+
+            for chunk in to_json_bytes(item):
+                yield chunk
+
+        yield "]".encode()
+
     else:
         yield json.dumps(node).encode()
