@@ -3,7 +3,7 @@ import os
 from .definitions import STATUS_CODES
 
 
-class HttpResponse:
+class WebResponse:
     code: int
     headers: dict
     data: bytes

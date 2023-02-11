@@ -3,7 +3,7 @@ import utime
 
 from api import ErrorView, JsonView, convert
 from config import *
-from http import HttpRequest, HttpResponse
+from web import WebRequest, WebResponse
 
 from machine import RTC
 
@@ -14,14 +14,14 @@ class WallclockController:
     def __init__(self) -> None:
         pass
 
-    def get(self, request: HttpRequest) -> HttpResponse:
+    def get(self, request: WebRequest) -> WebResponse:
         print("api.wallclock: get")
 
         return JsonView({
             "time": convert.time_to_string(utime.time())
         }).render()
 
-    def post(self, request: HttpRequest) -> HttpResponse:
+    def post(self, request: WebRequest) -> WebResponse:
         print("api.wallclock: post")
         try:
             data = json.loads(request.data.decode())

@@ -3,7 +3,7 @@ import time
 
 from api import ApiProvider
 from config import *
-from http import WebServer, StaticPageProvider
+from web import WebServer, StaticPageProvider
 from stage import Board, WallclockStage
 
 from .cefo import CelonesFont

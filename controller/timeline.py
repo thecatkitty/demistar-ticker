@@ -1,7 +1,7 @@
 import json
 
 from api import ErrorView, JsonView, convert
-from http import HttpRequest, HttpResponse
+from web import WebRequest, WebResponse
 
 from stage.base import Board
 from stage.manual import ManualStage
@@ -19,14 +19,14 @@ class TimelineController:
         self._board = board
         self._manager = stage_manager
 
-    def get(self, request: HttpRequest) -> HttpResponse:
+    def get(self, request: WebRequest) -> WebResponse:
         print("api.timeline: get")
         return JsonView({
             "backlog": [item.to_dict() for item in self._manager.timeline],
             "cycle": [item.to_dict() for item in self._manager.cycle]
         }).render()
 
-    def post(self, request: HttpRequest) -> HttpResponse:
+    def post(self, request: WebRequest) -> WebResponse:
         print("api.timeline: post")
         try:
             data = json.loads(request.data.decode())

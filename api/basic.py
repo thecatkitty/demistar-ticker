@@ -1,4 +1,4 @@
-from http import HttpResponse
+from web import WebResponse
 
 
 class BasicView:
@@ -9,5 +9,5 @@ class BasicView:
         self.model = model
         self.status = status
 
-    def render(self) -> HttpResponse:
+    def render(self) -> WebResponse:
         raise NotImplementedError()

@@ -2,7 +2,7 @@ from api import JsonView
 from config import *
 from effects import display as dfx
 from effects import ring as rfx
-from http import HttpRequest, HttpResponse
+from web import WebRequest, WebResponse
 
 
 class EffectsController:
@@ -11,7 +11,7 @@ class EffectsController:
     def __init__(self) -> None:
         pass
 
-    def get(self, request: HttpRequest) -> HttpResponse:
+    def get(self, request: WebRequest) -> WebResponse:
         print("api.effects: get")
 
         return JsonView({

@@ -2,11 +2,11 @@ import re
 import socket
 from collections import OrderedDict
 
-import http
+import web
 
 
 RECV_BUFFER = 512
-HTTP_METHOD_MAX_LENGTH = max([len(method) for method in http.METHODS])
+HTTP_METHOD_MAX_LENGTH = max([len(method) for method in web.METHODS])
 HTTP_ENTITY_MAX_LENGTH = 16 * 1024
 
 
@@ -17,11 +17,11 @@ class WebServer:
     _state: int
     _buff: bytearray
 
-    _request: http.HttpRequest
-    _response: http.HttpResponse
+    _request: web.WebRequest
+    _response: web.WebResponse
 
     _providers: OrderedDict
-    _fallback: http.ContentProvider
+    _fallback: web.ContentProvider
 
     STATE_IDLE = 0
     STATE_CONNECTED = 1
@@ -41,7 +41,7 @@ class WebServer:
         self._state = WebServer.STATE_IDLE
 
         self._providers = OrderedDict()
-        self._fallback = http.ContentProvider()
+        self._fallback = web.ContentProvider()
 
         print("web: listening at {}".format(port))
 
@@ -49,7 +49,7 @@ class WebServer:
     def port(self) -> int:
         return self._port
 
-    def add_provider(self, pattern: str, provider: http.ContentProvider):
+    def add_provider(self, pattern: str, provider: web.ContentProvider):
         self._providers[pattern] = provider
 
     def handle(self) -> None:
@@ -71,13 +71,13 @@ class WebServer:
                 return
 
             reqline = self._buff.decode().split()
-            if reqline[0] not in [method[:len(reqline[0])] for method in http.METHODS]:
+            if reqline[0] not in [method[:len(reqline[0])] for method in web.METHODS]:
                 print("web: invalid request line")
                 return self._bad_request()
 
             if len(reqline) > 1:
-                self._request = http.HttpRequest(reqline[0])
-                self._response = http.HttpResponse()
+                self._request = web.WebRequest(reqline[0])
+                self._response = web.WebResponse()
                 self._buff = self._buff[(len(reqline[0]) + 1):]
                 self._state = WebServer.STATE_METHOD_KNOWN
 
@@ -147,7 +147,7 @@ class WebServer:
             self._remote.close()
             self._state = WebServer.STATE_IDLE
             print("web: responded with {}".format(
-                http.STATUS_CODES[self._response.code]))
+                web.STATUS_CODES[self._response.code]))
 
     def _try_receive(self) -> bool:
         try:
@@ -164,7 +164,7 @@ class WebServer:
 
     def _prepare_response(self) -> None:
         if len(self._providers) == 0:
-            self._response = http.HttpResponse(500)
+            self._response = web.WebResponse(500)
             print("web: no registered providers")
             return
 
@@ -174,7 +174,7 @@ class WebServer:
                     self._response = provider.handle_request(self._request)
                     return
         except Exception as e:
-            self._response = http.HttpResponse(500)
+            self._response = web.WebResponse(500)
             self._response.headers["Content-Type"] = "text/plain"
             self._response.data = "{}: {}".format(type(e).__name__, e).encode()
             return

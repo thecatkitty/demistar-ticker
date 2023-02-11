@@ -1,4 +1,4 @@
-class HttpRequest:
+class WebRequest:
     method: str
     uri: str
     headers: dict

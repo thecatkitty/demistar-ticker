@@ -1,10 +1,10 @@
-from .request import HttpRequest
-from .response import HttpResponse
+from .request import WebRequest
+from .response import WebResponse
 
 
 class ContentProvider:
-    def handle_request(self, request: HttpRequest) -> HttpResponse:
-        return HttpResponse(404)
+    def handle_request(self, request: WebRequest) -> WebResponse:
+        return WebResponse(404)
 
 
 class StaticPageProvider(ContentProvider):
@@ -15,11 +15,11 @@ class StaticPageProvider(ContentProvider):
         self._type = type
         self._data = data
 
-    def handle_request(self, request: HttpRequest) -> HttpResponse:
+    def handle_request(self, request: WebRequest) -> WebResponse:
         if request.method != "GET":
-            return HttpResponse(405)
+            return WebResponse(405)
 
-        response = HttpResponse(200)
+        response = WebResponse(200)
         response.headers["Content-Type"] = self._type
         response.data = self._data
         return response
