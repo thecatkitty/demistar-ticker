@@ -3,3 +3,4 @@ from .manager import StageManager
 from .cefo import CelonesFont
 from .matrix import MatrixDisplay
 from .ring import Ring
+from .storage import LineStorage
