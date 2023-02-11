@@ -14,9 +14,6 @@ RING_PIXELS = 16
 RINGS = 2
 RINGS_PIN = 9
 
-TZ_OFFSET = +1 * 60 * 60
-LANG = 'en'
-
 LOCAL = dict()
 with open('demistar.conf', 'r') as file:
     LOCAL = json.load(file)

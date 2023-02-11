@@ -1,6 +1,6 @@
 import config
 
-if config.LANG == 'pl':
+if config.LOCAL['language'] == 'pl':
     from .pl import *
 else:
     from .en import *
