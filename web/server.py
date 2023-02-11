@@ -2,6 +2,8 @@ import re
 import socket
 from collections import OrderedDict
 
+from .definitions import STATUS_CODES
+
 import web
 
 
@@ -143,7 +145,18 @@ class WebServer:
             if self._response.code == 0:
                 self._prepare_response()
 
-            self._remote.write(self._response.to_bytes())
+            self._remote.write("HTTP/1.1 {code} {status}\r\n".format(
+                code=self._response.code,
+                status=STATUS_CODES[self._response.code]).encode())
+
+            for name, value in self._response.headers.items():
+                self._remote.write("{}: {}\r\n".format(name, value).encode())
+
+            self._remote.write("\r\n".encode())
+
+            for block in self._response.get_bytes():
+                self._remote.write(block)
+
             self._remote.close()
             self._state = WebServer.STATE_IDLE
             print("web: responded with {}".format(

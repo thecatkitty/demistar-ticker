@@ -1,7 +1,5 @@
 import os
 
-from .definitions import STATUS_CODES
-
 
 class WebResponse:
     code: int
@@ -15,12 +13,9 @@ class WebResponse:
             os.uname()[2])
         self.data = bytes(0)
 
-    def to_bytes(self) -> bytes:
-        reqline = "HTTP/1.1 {code} {status}\r\n".format(
-            code=self.code,
-            status=STATUS_CODES[self.code])
-        headers = "\r\n".join([
-            "{}: {}".format(name, value) for name, value in self.headers.items()
-        ])
+    def get_bytes(self):
+        offset = 0
 
-        return reqline.encode() + headers.encode() + b"\r\n\r\n" + self.data
+        while offset < len(self.data):
+            yield self.data[offset:(offset + 512)]
+            offset += 512
