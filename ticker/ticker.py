@@ -5,6 +5,7 @@ from web import WebServer, StaticPageProvider
 
 from .cefo import CelonesFont
 from .manager import StageManager
+from .timeline import Timeline
 
 
 class DemistarTicker:
@@ -26,8 +27,9 @@ class DemistarTicker:
             "stage_manager": self._manager
         }))
 
-        wallclock = WallclockStage()
-        self._manager.add_stage(45, wallclock)
+        if len(Timeline._storage) == 0:
+            wallclock = WallclockStage()
+            self._manager.add_stage(45, wallclock)
 
         while True:
             self._loop()
