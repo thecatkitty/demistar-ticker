@@ -4,6 +4,7 @@ import os
 
 class LineStorage:
     _file: io.BufferedRandom
+    _filename: str
     _last: int
     _lock: bool
 
@@ -15,6 +16,7 @@ class LineStorage:
                 pass
 
         self._file = open(filename, "r+b")
+        self._filename = filename
         self._last = self._count_all() - 1
         self._lock = False
 
@@ -30,6 +32,15 @@ class LineStorage:
             i += 1
 
         return i
+
+    def clear(self):
+        self._file.close()
+        os.remove(self._filename)
+        with open(self._filename, 'w') as _:
+            pass
+
+        self._file = open(self._filename, "r+b")
+        self._last = -1
 
     def enumerate(self):
         if not self.acquire():
