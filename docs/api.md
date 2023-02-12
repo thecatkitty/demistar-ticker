@@ -81,8 +81,8 @@
 ### Timeline (dict)
 | Member        | Type                  | Description
 |---------------|-----------------------|---------------------------------------
-| backlog       | TimelineItem[]        | List of all incoming items
-| cycle         | TimelineItem[]        | List of all items within the current cycle; **Hub:** Empty
+| backlog       | TimelineItem[]        | List of all items
+| cycle         | int[]                 | List of all item identifiers within the current cycle; **Hub:** Empty
 
 ### TimelineItem (dict)
 | Member        | Type                  | Description

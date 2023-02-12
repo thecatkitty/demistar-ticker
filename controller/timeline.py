@@ -4,7 +4,6 @@ import utime
 from api import ErrorResponse, JsonResponse, convert
 from web import WebRequest, WebResponse
 
-from stage.base import Board
 from ticker.manager import StageManager
 from ticker.timeline import Timeline
 
@@ -17,11 +16,18 @@ class TimelineController:
     def __init__(self, stage_manager: StageManager) -> None:
         self._manager = stage_manager
 
+    @staticmethod
+    def _get_backlog():
+        for id, item in Timeline.load_dicts():
+            if type(item) is dict:
+                item.update({"id": id})
+                yield item
+
     def get(self, request: WebRequest) -> WebResponse:
         print("api.timeline: get")
         return JsonResponse({
-            "backlog": [item.update({"id": i}) for i, item in Timeline.load_dicts() if type(item) is dict],
-            "cycle": [item.to_dict() for item in self._manager.cycle]
+            "backlog": TimelineController._get_backlog,
+            "cycle": [id for id, _ in self._manager.cycle]
         })
 
     def post(self, request: WebRequest) -> WebResponse:

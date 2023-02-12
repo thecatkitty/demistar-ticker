@@ -7,7 +7,7 @@ from .timeline import Timeline, TimelineItem
 
 
 class StageManager:
-    cycle: list[TimelineItem]
+    cycle: list[tuple[int, TimelineItem]]
     _index: int
     _cycle_start: int
     _board: Board
@@ -19,23 +19,25 @@ class StageManager:
         self._board = board
 
     def _get_cycle(self, now: int) -> None:
-        fresh = list((i, item) for i, item in Timeline.load_items()
-                     if item.start < now)
-        for i, item in fresh:
-            print("manager: in - {}".format(item))
-            Timeline.remove(i)
-            self.cycle.append(item)
+        cycle_ids = list(id for id, _ in self.cycle)
+        fresh = list((id, item) for id, item in Timeline.load_items()
+                     if item.start < now and id not in cycle_ids)
+        for id, item in fresh:
+            print("manager: in - {} {}".format(id, item))
+            self.cycle.append((id, item))
 
-        stale = list(item for item in self.cycle
+        stale = list(id for id, item in self.cycle
                      if item.duration > 0 and item.start + item.duration < now)
-        for item in stale:
-            print("manager: out - {}".format(item))
+        for id in stale:
+            item = next(i for i in self.cycle if i[0] == id)
+            print("manager: out - {} {}".format(*item))
             self.cycle.remove(item)
+            Timeline.remove(id)
 
     def _set_stage(self, index: int) -> None:
         self._index = index
         print("manager: stage {} - {}".format(index, self.cycle[index]))
-        self.cycle[index].stage.show(self._board)
+        (self.cycle[index])[1].stage.show(self._board)
 
     def _restart_cycle(self, now: int) -> None:
         self._cycle_start = now
@@ -60,10 +62,10 @@ class StageManager:
         if self._cycle_start == 0 or self._index >= len(self.cycle):
             return self._restart_cycle(now)
 
-        if now > self._cycle_start + sum(item.screentime for item in self.cycle[:self._index + 1]):
+        if now > self._cycle_start + sum(item.screentime for _, item in self.cycle[:self._index + 1]):
             return self._next_stage()
 
-        self.cycle[self._index].stage.update(self._board)
+        self.cycle[self._index][1].stage.update(self._board)
 
     def add_stage(self, screentime: int, stage: Stage, start: int = 0, duration: int = 0) -> int:
         item = TimelineItem()
