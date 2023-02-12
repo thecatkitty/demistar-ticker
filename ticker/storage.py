@@ -125,3 +125,22 @@ class LineStorage:
 
     def release(self):
         self._lock = False
+
+    def __len__(self) -> int:
+        if not self.acquire():
+            return -1
+
+        count = 0
+        self._file.seek(0)
+
+        line = b"+"
+        while True:
+            line = self._file.readline()
+            if len(line) == 0:
+                break
+
+            if line[0] == ord(b"+"):
+                count += 1
+
+        self.release()
+        return count
