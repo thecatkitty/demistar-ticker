@@ -25,6 +25,15 @@ class TimelineController:
 
     def get(self, request: WebRequest) -> WebResponse:
         print("api.timeline: get")
+        if request.uri.count("/") == 2:
+            id = int(request.uri.split("/")[2])
+            data = Timeline.load_dict(id)
+            if data is None:
+                return ErrorResponse(404, "Item not found")
+
+            data.update({"id": id})
+            return JsonResponse(data)
+
         return JsonResponse({
             "backlog": TimelineController._get_backlog,
             "cycle": [id for id, _ in self._manager.cycle]

@@ -47,6 +47,11 @@ class Timeline:
     _storage = LineStorage("data/timeline.txt")
 
     @staticmethod
+    def load_dict(id: int) -> dict | None:
+        data = Timeline._storage.load(id)
+        return None if data is None else json.loads(data)
+
+    @staticmethod
     def load_dicts():
         for i, item in Timeline._storage.enumerate():
             yield i, json.loads(item)

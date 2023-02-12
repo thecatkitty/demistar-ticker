@@ -51,6 +51,24 @@ class LineStorage:
 
         self.release()
 
+    def load(self, id: int) -> bytes | None:
+        if not self.acquire():
+            return None
+
+        i = 0
+        self._file.seek(0)
+
+        line = b"+"
+        while len(line) > 0:
+            line = self._file.readline()
+            if i == id:
+                break
+
+            i += 1
+
+        self.release()
+        return line[1:] if len(line) > 0 else None
+
     def add(self, line: bytes) -> int:
         if not self.acquire():
             return -1
