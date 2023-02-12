@@ -2,43 +2,28 @@ import utime
 
 from api import convert
 from stage import Stage
-
-
-class TimelineItem:
-    start: int
-    duration: int
-    screentime: int
-    stage: Stage
-
-    def __str__(self) -> str:
-        return "{} {}".format(self.screentime, self.stage)
-
-    def to_dict(self) -> dict:
-        return {
-            "start": convert.time_to_string(self.start),
-            "duration": self.duration,
-            "screentime": self.screentime,
-            "stage": self.stage.to_dict()
-        }
+from stage.base import Board
+from .timeline import Timeline, TimelineItem
 
 
 class StageManager:
-    timeline: list[TimelineItem]
     cycle: list[TimelineItem]
     _index: int
     _cycle_start: int
+    _board: Board
 
-    def __init__(self) -> None:
-        self.timeline = list()
+    def __init__(self, board: Board) -> None:
         self.cycle = list()
         self._index = 0
         self._cycle_start = 0
+        self._board = board
 
     def _get_cycle(self, now: int) -> None:
-        fresh = list(item for item in self.timeline if item.start < now)
-        for item in fresh:
+        fresh = list((i, item) for i, item in Timeline.load_items(self._board)
+                     if item.start < now)
+        for i, item in fresh:
             print("manager: in - {}".format(item))
-            self.timeline.remove(item)
+            Timeline.remove(i)
             self.cycle.append(item)
 
         stale = list(item for item in self.cycle
@@ -80,10 +65,10 @@ class StageManager:
 
         self.cycle[self._index].stage.update()
 
-    def add_stage(self, screentime: int, stage: Stage, start: int = 0, duration: int = 0) -> None:
+    def add_stage(self, screentime: int, stage: Stage, start: int = 0, duration: int = 0) -> int:
         item = TimelineItem()
         item.start = utime.time() if start == 0 else start
         item.duration = duration
         item.screentime = screentime
         item.stage = stage
-        self.timeline.append(item)
+        return Timeline.add(item.to_dict())

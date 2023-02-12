@@ -26,7 +26,7 @@ class DemistarTicker:
         self._board.top.font = font
         self._board.bottom.font = font
 
-        self._manager = StageManager()
+        self._manager = StageManager(self._board)
         self._rings_changed = False
 
     def run(self, port: int) -> None:

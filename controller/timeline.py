@@ -1,12 +1,12 @@
 import json
+import utime
 
 from api import ErrorResponse, JsonResponse, convert
 from web import WebRequest, WebResponse
 
 from stage.base import Board
-from stage.manual import ManualStage
-from stage.wallclock import WallclockStage
 from ticker.manager import StageManager
+from ticker.timeline import Timeline
 
 
 class TimelineController:
@@ -22,7 +22,7 @@ class TimelineController:
     def get(self, request: WebRequest) -> WebResponse:
         print("api.timeline: get")
         return JsonResponse({
-            "backlog": [item.to_dict() for item in self._manager.timeline],
+            "backlog": [item.update({"id": i}) for i, item in Timeline.load_dicts() if type(item) is dict],
             "cycle": [item.to_dict() for item in self._manager.cycle]
         })
 
@@ -38,13 +38,13 @@ class TimelineController:
 
         start = data.get("start")
         try:
-            start = convert.string_to_time(start)  # type: ignore
+            convert.string_to_time(start)  # type: ignore
         except Exception:
-            start = 0
+            data["start"] = convert.time_to_string(utime.time())
 
         duration = data.get("duration")
         if type(duration) is not int:
-            duration = 0
+            data["duration"] = 0
 
         screentime = data.get("screentime")
         if type(screentime) is not int:
@@ -58,14 +58,9 @@ class TimelineController:
         if type(stage_name) is not str:
             return ErrorResponse(422, "'stage.name' is expected to be a string")
 
-        if stage_name == "manual":
-            stage = ManualStage.from_dict(self._board, stage)  # type: ignore
-        elif stage_name == "wallclock":
-            stage = WallclockStage.from_dict(
-                self._board, stage)  # type: ignore
-        else:
+        if stage_name not in ["manual", "wallclock"]:
             return ErrorResponse(422, "unknown 'stage.name'")
 
-        self._manager.add_stage(screentime, stage, start,  # type: ignore
-                                duration)
-        return JsonResponse({})
+        return JsonResponse({
+            "id": Timeline.add(data)
+        })
