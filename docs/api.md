@@ -17,11 +17,16 @@
 | Method    | URL                       | Request           | Response          | Description
 |-----------|---------------------------|-------------------|-------------------|-------------------
 | `GET`     | /timeline                 | -                 | Timeline          | Get all timeline items
-| `POST`    | /timeline                 | TimelineItem      | int (itemid)      | Add a new timeline item
-| `DELETE`  | /timeline                 | -                 | int (count)       | Empty the timeline
+| `POST`    | /timeline                 | TimelineItem      | IdResponse        | Add a new timeline item
+| `DELETE`  | /timeline                 | -                 | CountResponse     | Empty the timeline
 | `DELETE`  | /timeline/`{itemid}`      | -                 | TimelineItem      | Remove an item from the timeline
 
 ## Types
+
+### CountResponse (dict)
+| Member        | Type                  | Description
+|---------------|-----------------------|---------------------------------------
+| count         | int                   | Number of processed items
 
 ### DateTime (str)
 `{year}-{month:02}-{day:02}T{hour:02}:{minute:02}:{second:02}`
@@ -39,6 +44,11 @@
 |---------------|-----------------------|---------------------------------------
 | display       | str[]                 | List of supported text display effects
 | ring          | str[]                 | List of supported ring effects
+
+### IdResponse (dict)
+| Member        | Type                  | Description
+|---------------|-----------------------|---------------------------------------
+| id            | int                   | Item unique identifier
 
 ### ManualStage (Stage)
 | Member        | Type                  | Description
