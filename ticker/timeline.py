@@ -48,7 +48,7 @@ class Timeline:
 
     @staticmethod
     def load_dicts():
-        for i, item in Timeline._storage.load():
+        for i, item in Timeline._storage.enumerate():
             yield i, json.loads(item)
 
     @staticmethod

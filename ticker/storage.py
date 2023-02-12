@@ -31,7 +31,7 @@ class LineStorage:
 
         return i
 
-    def load(self):
+    def enumerate(self):
         if not self.acquire():
             return None
 
