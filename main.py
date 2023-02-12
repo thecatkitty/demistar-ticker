@@ -3,6 +3,7 @@ import time
 
 from config import *
 from ticker import DemistarTicker, MatrixDisplay, Ring
+from stage import Board
 
 from machine import RTC, reset
 from driver.neopixel import Neopixel
@@ -17,7 +18,8 @@ strip = Neopixel(RING_PIXELS * RINGS, 0, RINGS_PIN, "GRB", delay=0.001)
 outer_ring = Ring(strip, 0, 16)
 inner_ring = Ring(strip, 16, 16)
 
-app = DemistarTicker(top_display, bottom_display, inner_ring, outer_ring)
+board = Board(top_display, bottom_display, inner_ring, outer_ring)
+app = DemistarTicker(board)
 
 # Initialization
 strip.clear()
