@@ -26,7 +26,7 @@ class TimelineItem:
         }
 
     @staticmethod
-    def from_dict(board: Board, data: dict):
+    def from_dict(data: dict):
         item = TimelineItem()
         item.start = convert.string_to_time(data["start"])
         item.duration = data["duration"]
@@ -34,9 +34,9 @@ class TimelineItem:
 
         stage = data["stage"]
         if stage["name"] == "manual":
-            item.stage = ManualStage.from_dict(board, stage)  # type: ignore
+            item.stage = ManualStage.from_dict(stage)  # type: ignore
         elif stage["name"] == "wallclock":
-            item.stage = WallclockStage.from_dict(board, stage)  # type: ignore
+            item.stage = WallclockStage.from_dict(stage)  # type: ignore
         else:
             item.stage = Stage()
 
@@ -52,9 +52,9 @@ class Timeline:
             yield i, json.loads(item)
 
     @staticmethod
-    def load_items(board: Board):
+    def load_items():
         for i, item in Timeline.load_dicts():
-            yield i, TimelineItem.from_dict(board, item)
+            yield i, TimelineItem.from_dict(item)
 
     @staticmethod
     def add(item: dict) -> int:

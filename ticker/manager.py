@@ -19,7 +19,7 @@ class StageManager:
         self._board = board
 
     def _get_cycle(self, now: int) -> None:
-        fresh = list((i, item) for i, item in Timeline.load_items(self._board)
+        fresh = list((i, item) for i, item in Timeline.load_items()
                      if item.start < now)
         for i, item in fresh:
             print("manager: in - {}".format(item))
@@ -35,7 +35,7 @@ class StageManager:
     def _set_stage(self, index: int) -> None:
         self._index = index
         print("manager: stage {} - {}".format(index, self.cycle[index]))
-        self.cycle[index].stage.show()
+        self.cycle[index].stage.show(self._board)
 
     def _restart_cycle(self, now: int) -> None:
         self._cycle_start = now
@@ -63,7 +63,7 @@ class StageManager:
         if now > self._cycle_start + sum(item.screentime for item in self.cycle[:self._index + 1]):
             return self._next_stage()
 
-        self.cycle[self._index].stage.update()
+        self.cycle[self._index].stage.update(self._board)
 
     def add_stage(self, screentime: int, stage: Stage, start: int = 0, duration: int = 0) -> int:
         item = TimelineItem()

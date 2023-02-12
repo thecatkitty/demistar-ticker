@@ -7,43 +7,41 @@ from .base import Board, Stage
 
 
 class WallclockStage(Stage):
-    _b: Board
     _last_sec: int
 
-    def __init__(self, board: Board) -> None:
-        self._b = board
+    def __init__(self) -> None:
         self._last_sec = -1
 
-    def show(self) -> None:
+    def show(self, board: Board) -> None:
         self._last_sec = -1
 
-    def update(self) -> None:
+    def update(self, board: Board) -> None:
         timestamp = time.localtime()
         if timestamp[5] == self._last_sec:
             return
 
         if timestamp[0] < 2023:
-            self._b.top.clear()
-            self._b.top.draw_text("wrong date")
-            self._b.top.update()
+            board.top.clear()
+            board.top.draw_text("wrong date")
+            board.top.update()
 
-            self._b.bottom.clear()
-            self._b.bottom.draw_text("POST wallclock")
-            self._b.bottom.update()
+            board.bottom.clear()
+            board.bottom.draw_text("POST wallclock")
+            board.bottom.update()
 
             if timestamp[5] % 2 == 0:
-                self._b.inner.fill(3, 1, 0, False)
-                self._b.outer.fill(0, 0, 0, False)
+                board.inner.fill(3, 1, 0, False)
+                board.outer.fill(0, 0, 0, False)
             else:
-                self._b.inner.fill(0, 0, 0, False)
-                self._b.outer.fill(3, 1, 0, False)
-            self._b.inner.update()
+                board.inner.fill(0, 0, 0, False)
+                board.outer.fill(3, 1, 0, False)
+            board.inner.update()
             return
 
-        self._b.top.clear()
-        self._b.top.draw_text(
+        board.top.clear()
+        board.top.draw_text(
             "{3:02}:{4:02}:{5:02}".format(*timestamp))
-        self._b.top.update()
+        board.top.update()
 
         bottom_text = lang.WEEKDAYS[timestamp[6]]
         if self._last_sec >= 45:
@@ -51,19 +49,19 @@ class WallclockStage(Stage):
                 month_name=lang.MONTHS[timestamp[1] - 1],
                 day=timestamp[2])
 
-        self._b.bottom.clear()
-        self._b.bottom.draw_text(bottom_text, x=-1)
-        self._b.bottom.update()
+        board.bottom.clear()
+        board.bottom.draw_text(bottom_text, x=-1)
+        board.bottom.update()
 
         minute_hand = round(timestamp[4] * 16 / 60)
-        self._b.inner.fill(0, 0, 0, False)
-        self._b.inner.put_line(3, 0, 2, 0, minute_hand, False)
+        board.inner.fill(0, 0, 0, False)
+        board.inner.put_line(3, 0, 2, 0, minute_hand, False)
 
         hour_hand = round((timestamp[3] % 12) * 16 / 12)
-        self._b.outer.fill(0, 0, 0, False)
-        self._b.outer.put_line(3, 2, 0, 0, hour_hand, False)
+        board.outer.fill(0, 0, 0, False)
+        board.outer.put_line(3, 2, 0, 0, hour_hand, False)
 
-        self._b.inner.update()
+        board.inner.update()
         self._last_sec = timestamp[5]
 
     def to_dict(self) -> dict:
@@ -72,5 +70,5 @@ class WallclockStage(Stage):
         }
     
     @staticmethod
-    def from_dict(board: Board, o: dict) -> object:
-        return WallclockStage(board)
+    def from_dict(o: dict) -> object:
+        return WallclockStage()

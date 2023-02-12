@@ -1,4 +1,3 @@
-import network
 import time
 
 from api import ApiProvider
@@ -34,11 +33,10 @@ class DemistarTicker:
         self._server.add_provider(
             "^/$", StaticPageProvider("text/html", "<h1>It works!</h1>".encode()))
         self._server.add_provider("^/", ApiProvider({
-            "board": self._board,
             "stage_manager": self._manager
         }))
 
-        wallclock = WallclockStage(self._board)
+        wallclock = WallclockStage()
         self._manager.add_stage(45, wallclock)
 
         while True:

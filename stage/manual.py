@@ -9,34 +9,32 @@ class ManualStage(Stage):
     inner: tuple
     outer: tuple
 
-    _b: Board
     _top: dfx.Marquee
     _bottom: dfx.Marquee
     _inner: rfx.RingEffect
     _outer: rfx.RingEffect
 
-    def __init__(self, board: Board) -> None:
-        self._b = board
+    def __init__(self) -> None:
         self.top = ""
         self.bottom = ""
         self.inner = "color", 0, 0, 0
         self.outer = "color", 0, 0, 0
 
-    def show(self) -> None:
-        self._top = dfx.Marquee(self._b.top, self._b.top.font.print(self.top))
+    def show(self, board: Board) -> None:
+        self._top = dfx.Marquee(board.top, board.top.font.print(self.top))
         self._bottom = dfx.Marquee(
-            self._b.bottom, self._b.bottom.font.print(self.bottom))
+            board.bottom, board.bottom.font.print(self.bottom))
         self._inner = rfx.create(
-            ring=self._b.inner,
+            ring=board.inner,
             name=self.inner[0],
             args=self.inner[1:-1] if self.inner[0] != "color"
-                else self.inner[1:],
+            else self.inner[1:],
             time_ms=self.inner[-1])
         self._outer = rfx.create(
-            ring=self._b.outer,
+            ring=board.outer,
             name=self.outer[0],
             args=self.outer[1:-1] if self.outer[0] != "color"
-                else self.outer[1:],
+            else self.outer[1:],
             time_ms=self.outer[-1])
 
         self._top.start()
@@ -44,7 +42,7 @@ class ManualStage(Stage):
         self._inner.start()
         self._outer.start()
 
-    def update(self) -> None:
+    def update(self, board: Board) -> None:
         self._top.update()
         self._bottom.update()
         self._inner.update()
@@ -60,8 +58,8 @@ class ManualStage(Stage):
         }
 
     @staticmethod
-    def from_dict(board: Board, o: dict) -> object:
-        stage = ManualStage(board)
+    def from_dict(o: dict) -> object:
+        stage = ManualStage()
 
         top = o.get("top")
         if type(top) is str:

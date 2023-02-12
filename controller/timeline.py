@@ -10,13 +10,11 @@ from ticker.timeline import Timeline
 
 
 class TimelineController:
-    dependencies = ["board", "stage_manager"]
+    dependencies = ["stage_manager"]
 
-    _board: Board
     _manager: StageManager
 
-    def __init__(self, board: Board, stage_manager: StageManager) -> None:
-        self._board = board
+    def __init__(self, stage_manager: StageManager) -> None:
         self._manager = stage_manager
 
     def get(self, request: WebRequest) -> WebResponse:
