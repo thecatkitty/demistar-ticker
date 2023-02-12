@@ -15,8 +15,21 @@ class LineStorage:
                 pass
 
         self._file = open(filename, "r+b")
-        self._last = -1
+        self._last = self._count_all() - 1
         self._lock = False
+
+    def _count_all(self) -> int:
+        i = 0
+        self._file.seek(0)
+
+        while True:
+            line = self._file.readline()
+            if len(line) == 0:
+                break
+
+            i += 1
+
+        return i
 
     def load(self):
         if not self.acquire():
