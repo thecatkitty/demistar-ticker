@@ -77,3 +77,20 @@ class TimelineController:
         return JsonResponse({
             "id": Timeline.add(data)
         })
+
+    def delete(self, request: WebRequest) -> WebResponse:
+        print("api.timeline: delete")
+        if request.uri.count("/") == 2:
+            id = int(request.uri.split("/")[2])
+            data = Timeline.load_dict(id)
+            if data is None:
+                return ErrorResponse(404, "Item not found")
+
+            self._manager.remove(id)
+            return JsonResponse(data)
+
+        self._manager.cycle.clear()
+
+        count = len(Timeline._storage)
+        Timeline._storage.clear()
+        return JsonResponse({"count": count})

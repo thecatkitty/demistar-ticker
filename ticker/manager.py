@@ -36,7 +36,7 @@ class StageManager:
 
     def _set_stage(self, index: int) -> None:
         self._index = index
-        print("manager: stage {} - {}".format(index, self.cycle[index]))
+        print("manager: stage {} - {} {}".format(index, *self.cycle[index]))
         (self.cycle[index])[1].stage.show(self._board)
 
     def _restart_cycle(self, now: int) -> None:
@@ -74,3 +74,11 @@ class StageManager:
         item.screentime = screentime
         item.stage = stage
         return Timeline.add(item.to_dict())
+
+    def remove(self, id: int):
+        if id in [cid for cid, _ in self.cycle]:
+            item = next(i for i in self.cycle if i[0] == id)
+            self.cycle.remove(item)
+            self._restart_cycle(utime.time())
+
+        Timeline.remove(id)
