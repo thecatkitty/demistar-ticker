@@ -71,7 +71,7 @@ class TimelineController:
         if type(stage_name) is not str:
             return ErrorResponse(422, "'stage.name' is expected to be a string")
 
-        if stage_name not in ["manual", "wallclock"]:
+        if stage_name not in ["manual", "meeting", "wallclock"]:
             return ErrorResponse(422, "unknown 'stage.name'")
 
         return JsonResponse({

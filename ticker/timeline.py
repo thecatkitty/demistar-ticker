@@ -1,9 +1,10 @@
 import json
+import time
 
 from stage import Stage
 from api import convert
-from stage.base import Board
 from stage.manual import ManualStage
+from stage.meeting import MeetingStage
 from stage.wallclock import WallclockStage
 from .storage import LineStorage
 
@@ -35,6 +36,10 @@ class TimelineItem:
         stage = data["stage"]
         if stage["name"] == "manual":
             item.stage = ManualStage.from_dict(stage)  # type: ignore
+        elif stage["name"] == "meeting":
+            item.stage = MeetingStage.from_dict(stage)
+            item.stage.start = time.localtime(item.start)
+            item.stage.end = time.localtime(item.start + item.duration)
         elif stage["name"] == "wallclock":
             item.stage = WallclockStage.from_dict(stage)  # type: ignore
         else:
