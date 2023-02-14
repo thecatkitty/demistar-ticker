@@ -1,3 +1,4 @@
+import machine
 import network
 import time
 
@@ -5,7 +6,6 @@ from config import *
 from ticker import DemistarTicker, MatrixDisplay, Ring
 from stage import Board
 
-from machine import RTC, reset
 from driver.neopixel import Neopixel
 
 
@@ -59,7 +59,7 @@ if status != network.STAT_GOT_IP:
     bottom_display.update()
 
     time.sleep(15)
-    reset()
+    machine.reset()
 
 # We're connected!
 print("net: address {}".format(net.ifconfig()[0]))

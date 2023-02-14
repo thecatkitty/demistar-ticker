@@ -1,3 +1,6 @@
+import machine
+import network
+
 from api import ApiProvider
 from config import *
 from stage import Board, WallclockStage
@@ -9,6 +12,7 @@ from .timeline import Timeline
 
 
 class DemistarTicker:
+    _network: network.WLAN
     _server: WebServer
     _manager: StageManager
 
@@ -20,6 +24,8 @@ class DemistarTicker:
         self._manager = StageManager(board)
 
     def run(self, port: int) -> None:
+        self._network = network.WLAN(network.STA_IF)
+
         self._server = WebServer(port)
         self._server.add_provider(
             "^/$", StaticPageProvider("text/html", "<h1>It works!</h1>".encode()))
@@ -35,6 +41,10 @@ class DemistarTicker:
             self._loop()
 
     def _loop(self) -> None:
+        if self._network.status() != network.STAT_GOT_IP:
+            print("net: disconnected!")
+            machine.reset()
+
         if hasattr(self, "_server"):
             self._server.handle()
 
