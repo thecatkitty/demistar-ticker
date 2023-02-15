@@ -1,6 +1,6 @@
 import sys
 
-from web import ContentProvider, WebRequest, WebResponse
+from web import ContentProvider, WebRequest, WebResponse, METHODS
 
 
 class ApiProvider(ContentProvider):
@@ -24,6 +24,15 @@ class ApiProvider(ContentProvider):
             print("api: ", str(e))
             return WebResponse(500)
 
+        if request.method == "OPTIONS":
+            response = WebResponse(200)
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Methods"] = ", ".join(
+                [method for method in METHODS if method.lower() in dir(ctrl_class)] + ["OPTIONS"])
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+            response.headers["Access-Control-Max-Age"] = "86400"
+            return response
+
         if request.method.lower() not in dir(ctrl_class):
             return WebResponse(405)
 
@@ -33,4 +42,6 @@ class ApiProvider(ContentProvider):
             ctrl_deps = [self._deps[dep] for dep in ctrl_class.dependencies]
             ctrl = ctrl_class(*ctrl_deps)
 
-        return getattr(ctrl, request.method.lower())(request)
+        response = getattr(ctrl, request.method.lower())(request)
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        return response
