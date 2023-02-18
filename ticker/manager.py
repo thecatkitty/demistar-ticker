@@ -3,6 +3,7 @@ import utime
 from api import convert
 from stage import Stage
 from stage.base import Board
+from stage.manual import ManualStage
 from .timeline import Timeline, TimelineItem
 
 
@@ -40,8 +41,14 @@ class StageManager:
         (self.cycle[index])[1].stage.show(self._board)
 
     def _restart_cycle(self, now: int) -> None:
-        self._cycle_start = now
-        self._set_stage(0)
+        if len(self.cycle) == 0:
+            stage = ManualStage()
+            stage.top = "Demistar Ticker"
+            stage.bottom = "timeline empty"
+            stage.show(self._board)
+        else:
+            self._cycle_start = now
+            self._set_stage(0)
 
     def _next_stage(self) -> None:
         self._index += 1
