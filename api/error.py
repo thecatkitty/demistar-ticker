@@ -6,3 +6,4 @@ class ErrorResponse(JsonResponse):
         super().__init__({
             "error": message
         }, status)
+        print("api.error:", message)
