@@ -27,7 +27,7 @@ class Marquee:
     def start(self) -> None:
         if self._width > 64:
             self._offset = 64
-            self._interval = round(10_000 / self._width)
+            self._interval = 80  # 5.12 seconds per screen
             self._time = utime.ticks_add(utime.ticks_ms(), self._interval)
 
         self._display.clear()
