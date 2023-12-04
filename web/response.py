@@ -9,7 +9,7 @@ class WebResponse:
     def __init__(self, code: int = 0) -> None:
         self.code = code
         self.headers = dict()
-        self.headers["Server"] = "demistar/0.1 (MicroPython {})".format(
+        self.headers["Server"] = "demistar/0.2 (MicroPython {})".format(
             os.uname()[2])
         self.data = bytes(0)
 
