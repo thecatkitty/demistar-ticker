@@ -33,31 +33,4 @@ bottom_display.update()
 # Going online
 net = network.WLAN(network.STA_IF)
 net.active(True)
-net.connect(LOCAL["wlan"]["ssid"], LOCAL["wlan"]["psk"])
-
-for i in range(LOCAL["wlan"]["retries"]):
-    if net.status() >= network.STAT_GOT_IP:
-        break
-
-    print("net: connecting ({}/{})".format(i + 1, LOCAL["wlan"]["retries"]))
-    inner_ring[i] = 0, 0, 64
-    time.sleep(1)
-
-status = net.status()
-if status != network.STAT_GOT_IP:
-    descriptions = DemistarTicker.NET_STAT_DESCRIPTIONS
-    description = descriptions[status] if status in descriptions.keys() else status
-
-    print("net: connection failed - {}".format(description))
-    inner_ring.fill(64, 0, 0)
-    bottom_display.draw_text(description)
-    bottom_display.update()
-
-    time.sleep(15)
-    machine.reset()
-
-# We're connected!
-print("net: address {}".format(net.ifconfig()[0]))
-inner_ring.fill(0, 64, 0)
-
 app.run(2137)

@@ -16,6 +16,7 @@ class DemistarTicker:
     _network: network.WLAN
     _server: WebServer
     _manager: StageManager
+    _port: int
 
     _last_net_check: int
     _last_time_save: int
@@ -25,7 +26,8 @@ class DemistarTicker:
         network.STAT_CONNECTING: "connecting",
         network.STAT_CONNECT_FAIL: "connect fail",
         network.STAT_NO_AP_FOUND: "no AP found",
-        network.STAT_WRONG_PASSWORD: "wrong password"
+        network.STAT_WRONG_PASSWORD: "wrong password",
+        network.STAT_GOT_IP: "connection successful"
     }
 
     TIME_SAVE = "/data/timesave.txt"
@@ -58,19 +60,22 @@ class DemistarTicker:
             timestamp)
         machine.RTC().datetime((year, month, mday, 0, hour, minute, second, 0))
 
+    def _start_server(self) -> None:
+        print("net: address {}".format(self._network.ifconfig()[0]))
+        self._server = WebServer(self._port)
+        self._server.add_provider(
+            "^/$", StaticPageProvider("text/html", "<h1>It works!</h1>".encode()))
+        self._server.add_provider("^/", ApiProvider({
+            "stage_manager": self._manager
+        }))
+
     def run(self, port: int) -> None:
         now = time.ticks_ms()
         self._last_net_check = now
         self._last_time_save = now
 
         self._network = network.WLAN(network.STA_IF)
-
-        self._server = WebServer(port)
-        self._server.add_provider(
-            "^/$", StaticPageProvider("text/html", "<h1>It works!</h1>".encode()))
-        self._server.add_provider("^/", ApiProvider({
-            "stage_manager": self._manager
-        }))
+        self._port = port
 
         self._load_time()
 
@@ -99,5 +104,7 @@ class DemistarTicker:
 
         if hasattr(self, "_server"):
             self._server.handle()
+        elif self._network.isconnected():
+            self._start_server()
 
         self._manager.handle()
