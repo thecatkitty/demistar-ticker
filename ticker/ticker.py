@@ -2,7 +2,7 @@ import machine
 import network
 import time
 
-from api import ApiProvider
+from api import ApiProvider, convert
 from config import *
 from stage import Board, WallclockStage
 from web import WebServer, StaticPageProvider
@@ -18,6 +18,7 @@ class DemistarTicker:
     _manager: StageManager
 
     _last_net_check: int
+    _last_time_save: int
 
     NET_STAT_DESCRIPTIONS = {
         network.STAT_IDLE: "network idle",
@@ -27,6 +28,8 @@ class DemistarTicker:
         network.STAT_WRONG_PASSWORD: "wrong password"
     }
 
+    TIME_SAVE = "/data/timesave.txt"
+
     def __init__(self, board: Board) -> None:
         font = CelonesFont("/ticker/Gidotto8.cefo")
         board.top.font = font
@@ -34,9 +37,33 @@ class DemistarTicker:
 
         self._manager = StageManager(board)
 
+    def _save_time(self) -> None:
+        saved_time = convert.time_to_string(time.time())
+        with open(DemistarTicker.TIME_SAVE, "w") as file:
+            file.write(saved_time)
+            print("ticker: saved time {}".format(saved_time))
+
+    def _load_time(self) -> None:
+        saved_time = "2021-01-01T00:00:00"
+        try:
+            with open(DemistarTicker.TIME_SAVE, "r") as file:
+                saved_time = file.readline()
+
+        except OSError:
+            print("ticker: no saved time!")
+
+        print("ticker: restored time {}".format(saved_time))
+        timestamp = convert.string_to_time(saved_time)
+        year, month, mday, hour, minute, second, _, _ = time.localtime(
+            timestamp)
+        machine.RTC().datetime((year, month, mday, 0, hour, minute, second, 0))
+
     def run(self, port: int) -> None:
+        now = time.ticks_ms()
+        self._last_net_check = now
+        self._last_time_save = now
+
         self._network = network.WLAN(network.STA_IF)
-        self._last_net_check = time.ticks_ms()
 
         self._server = WebServer(port)
         self._server.add_provider(
@@ -44,6 +71,8 @@ class DemistarTicker:
         self._server.add_provider("^/", ApiProvider({
             "stage_manager": self._manager
         }))
+
+        self._load_time()
 
         if len(Timeline._storage) == 0:
             wallclock = WallclockStage()
@@ -61,7 +90,12 @@ class DemistarTicker:
                 print("net:", DemistarTicker.NET_STAT_DESCRIPTIONS[status])
                 if status != network.STAT_CONNECTING:
                     print("net: connecting...")
-                    self._network.connect(LOCAL["wlan"]["ssid"], LOCAL["wlan"]["psk"])
+                    self._network.connect(
+                        LOCAL["wlan"]["ssid"], LOCAL["wlan"]["psk"])
+
+        if time.ticks_diff(now, self._last_time_save) > 180000:
+            self._last_time_save = now
+            self._save_time()
 
         if hasattr(self, "_server"):
             self._server.handle()
