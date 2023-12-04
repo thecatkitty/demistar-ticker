@@ -45,12 +45,7 @@ for i in range(LOCAL["wlan"]["retries"]):
 
 status = net.status()
 if status != network.STAT_GOT_IP:
-    descriptions = {
-        network.STAT_IDLE: "network idle",
-        network.STAT_CONNECTING: "connecting",
-        network.STAT_CONNECT_FAIL: "connect fail",
-        network.STAT_NO_AP_FOUND: "no AP found",
-        network.STAT_WRONG_PASSWORD: "wrong password"}
+    descriptions = DemistarTicker.NET_STAT_DESCRIPTIONS
     description = descriptions[status] if status in descriptions.keys() else status
 
     print("net: connection failed - {}".format(description))
