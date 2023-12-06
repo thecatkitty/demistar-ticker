@@ -19,13 +19,15 @@ class StageManager:
         self._cycle_start = 0
         self._board = board
 
-    def _get_cycle(self, now: int) -> None:
+    def _get_cycle(self, now: int) -> bool:
+        dirty = False
         cycle_ids = list(id for id, _ in self.cycle)
         fresh = list((id, item) for id, item in Timeline.load_items()
                      if item.start < now and id not in cycle_ids)
         for id, item in fresh:
             print("manager: in - {} {}".format(id, item))
             self.cycle.append((id, item))
+            dirty = True
 
         stale = list(id for id, item in self.cycle
                      if item.duration > 0 and item.start + item.duration < now)
@@ -34,6 +36,9 @@ class StageManager:
             print("manager: out - {} {}".format(*item))
             self.cycle.remove(item)
             Timeline.remove(id)
+            dirty = True
+
+        return dirty
 
     def _set_stage(self, index: int) -> None:
         self._index = index
@@ -41,6 +46,7 @@ class StageManager:
         (self.cycle[index])[1].stage.show(self._board)
 
     def _restart_cycle(self, now: int) -> None:
+        self._index = 0
         if len(self.cycle) == 0:
             stage = ManualStage()
             stage.top = "Demistar Ticker"
@@ -61,7 +67,8 @@ class StageManager:
 
     def handle(self) -> None:
         now = utime.time()
-        self._get_cycle(now)
+        if self._get_cycle(now):
+            self._restart_cycle(now)
 
         if len(self.cycle) == 0:
             return
