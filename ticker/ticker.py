@@ -21,15 +21,6 @@ class DemistarTicker:
     _last_net_check: int
     _last_time_save: int
 
-    NET_STAT_DESCRIPTIONS = {
-        network.STAT_IDLE: "network idle",
-        network.STAT_CONNECTING: "connecting",
-        network.STAT_CONNECT_FAIL: "connect fail",
-        network.STAT_NO_AP_FOUND: "no AP found",
-        network.STAT_WRONG_PASSWORD: "wrong password",
-        network.STAT_GOT_IP: "connection successful"
-    }
-
     TIME_SAVE = "/data/timesave.txt"
 
     def __init__(self, board: Board) -> None:
@@ -92,7 +83,7 @@ class DemistarTicker:
             self._last_net_check = now
             if not self._network.isconnected():
                 status = self._network.status()
-                print("net:", DemistarTicker.NET_STAT_DESCRIPTIONS[status])
+                print("net: status", status)
                 if status != network.STAT_CONNECTING:
                     print("net: connecting...")
                     self._network.connect(
